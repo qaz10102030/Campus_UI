@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 邊框的顏色 -->
+    <item android:right="0dp">
+        <shape android:shape="rectangle" >
+            <solid android:color="#000000" />
+        </shape>
+    </item>
+    <!-- 格子背景的顏色 -->
+    <item
+        android:bottom="0.5dp"
+        android:right="0.5dp">
+        <shape android:shape="rectangle" >
+            <solid android:color="#ffffff" />
+        </shape>
+    </item>
+
+</layer-list>
