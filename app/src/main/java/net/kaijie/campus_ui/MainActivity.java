@@ -13,8 +13,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -295,15 +293,6 @@ public class MainActivity extends AppCompatActivity
 
             //rabbit
 
-            FloatingActionButton fab = (FloatingActionButton)view.findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    final Snackbar snackbar = Snackbar.make(view, "诶嘿嘿 你想幹嘛", Snackbar
-                            .LENGTH_SHORT);
-                    snackbar.show();
-                }
-            });
             ///////////////////////////////////////
 
         }
