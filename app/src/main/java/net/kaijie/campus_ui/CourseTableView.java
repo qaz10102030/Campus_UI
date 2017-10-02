@@ -413,7 +413,6 @@ public class CourseTableView extends RelativeLayout {
         //初始化左側顯示節次的TextView
         initLeftTextViews(llLeftCol);
         llBottom.addView(llLeftCol);
-
         flCourseContent = new FrameLayout(getContext());
         LinearLayout.LayoutParams llp2 = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT);

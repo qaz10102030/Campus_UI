@@ -1,17 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="net.kaijie.campus_ui.MainActivity"
-    >
+    android:id="@+id/coordinator"
+    tools:context="net.kaijie.campus_ui.MainActivity">
 
-
-    <net.kaijie.campus_ui.CourseTableView
-        android:id="@+id/ctv"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent">
 
-</LinearLayout>
+        <!--rabbit-->
+        <net.kaijie.campus_ui.CourseTableView
+            android:id="@+id/ctv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@drawable/add"
+            app:backgroundTint="@color/add_bg_color"
+            app:elevation="6dp"
+            app:rippleColor="@color/add_selected_color"
+            app:pressedTranslationZ="25dp"
+            app:fabSize="normal"
+            app:layout_behavior="net.kaijie.campus_ui.FloatingActionButtonScrollBehavior"/>
+
+    </FrameLayout>
+</android.support.design.widget.CoordinatorLayout>
