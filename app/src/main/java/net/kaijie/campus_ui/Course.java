@@ -8,74 +8,71 @@ public class Course implements Serializable  {
 
 
     /* 要上課的節次*/
-    private int Classtimes;  //課程節次
-    private int Day;        //課程星期幾
-    private String Classroom; //課程教室
-    private int Num;        //課程課號
-    private String Name;    //課程名稱
-    private String Teacher;  //課程老師
-    private String des;
+    private int schedule;  //課程節次
+    private int day;//課程星期幾
+    private String room; //課程教室
+    private int serial;        //課程課號
+    private String name;    //課程名稱
+    private String name_eng;;    //課程名稱英文
+    private String teacher;      //課程老師
     private int spanNum ;// 默認跨每個課程跨越兩節(待修改)
 
-    private String ClassRoomName;
-    private String ClassTypeName;
-    public Course (int Classtimes, int Day, String Classroom,int Num,String Name, String des,int spanNum){
-        this.Classtimes = Classtimes;
-        this.Day=Day;
-        this.Classroom=Classroom;
-        this.Num=Num;
-        this.Name=Name;
-      //  this.Teacher=Teacher;
-        this.des = des;
+    public Course (int schedule, int day, String room,int serial, String name, String teacher,int spanNum){
+        this.schedule = schedule;
+        this.day=day;
+        this.room=room;
+        this.serial=serial;
+        this.name =name;
+        this.teacher = teacher;
         this.spanNum = spanNum;
 
     }
     public Course(){
    }
-    public int getClasstimes() {
-        return Classtimes;
+    public int getschedule() {
+        return schedule;
     }
 
-    public void setClasstimes(int Classtimes) {this.Classtimes = Classtimes;}
+    public void setschedule(int schedule) {this.schedule = schedule;}
 
-    public int getDay() {
-        return Day;
+    public int getday() {
+        return day;
     }
 
-    public void setDay(int Day) {
-        this.Day = Day;
+    public void setday(int day) {
+        this.day = day;
     }
 
-    public String getClassroom() {
-        return Classroom;
+    public String getroom() {
+        return room;
     }
 
-    public void setClassroom(String Classroom) {
-        this.Classroom = Classroom;
+    public void setroom(String room) {
+        this.room = room;
     }
 
-    public int getNum() {
-        return Num;
+    public int getserial() {
+        return serial;
     }
 
-    public void setNum(int Num) {
-        this.Num = Num;
+    public void setserial(int serial) {
+        this.serial = serial;
     }
 
-    public String getName() {
-        return Name;
+    public String getname() {
+        return name;
     }
 
-    public void setName(String Name) {
-        this.Name = Name;
+    public void setname(String name) {
+        this.name = name;
     }
 
-    public String getDes() {
-        return des;
+    public String getteacher() {
+        return teacher;
     }
 
-    public void setDes(String des) {
-        this.des = des;
+    public void setteacher(String teacher) {
+        this.teacher = teacher;
     }
 
 
@@ -83,11 +80,11 @@ public class Course implements Serializable  {
 
     public int getSpanNum( ) {return spanNum;}
 
-    @Override
+  /*  @Override
     public String toString() {
-        return "Course [Classtimes=" + Classtimes + ", Day=" + Day + ", des=" + des
-                +",Classroom="+ Classroom+", spanNun=" + spanNum + "]";
+        return "Course [Classtimes=" + schedule + ", Day=" + day + ", des=" + teacher
+                +",Classroom="+room+", spanNun=" + spanNum + "]";
     }
-
+*/
 
 }

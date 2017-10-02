@@ -28,8 +28,8 @@ import java.util.List;
 public class CourseTableView extends RelativeLayout {
     // 課程格子有課程的背景圖
     private static final int[] COURSE_BG = {R.drawable.course_info_light_blue, R.drawable.course_info_green,
-            R.drawable.course_info_red, R.drawable.course_info_blue, R.drawable.course_info_yellow,
-            R.drawable.course_info_orange, R.drawable.course_info_purple};
+            R.drawable.course_info_pink, R.drawable.course_info_yellow, R.drawable.course_info_orange
+            , R.drawable.course_info_purple, R.drawable.course_info_red};
     private List<? extends Course> coursesData;
     //用来保存課程資訊息
     public void updateCourseViews(List<? extends Course> coursesData) {
@@ -40,7 +40,7 @@ public class CourseTableView extends RelativeLayout {
     private OnCourseItemClickListener onCourseItemClickListener;
     //點擊課程的監聽事件 設定TextView內容格式
     public interface OnCourseItemClickListener {
-        void onCourseItemClick(TextView tv, int Classtimes, int Day, String Classroom, int Num, String Name,  String des);
+        void onCourseItemClick(TextView tv, int schedule, int day, String room,int serial,String name, String teacher);
     }
 
 
@@ -52,11 +52,11 @@ public class CourseTableView extends RelativeLayout {
         TextView tv;
         for (final Course c : coursesData) {
             //取得節次（等於行）
-            final int Classtimes = c.getClasstimes();
+            final int schedule = c.getschedule();
             //取得星期（等於列）
-            final int Day = c.getDay();
+            final int day = c.getday();
 
-            final int Num = c.getNum();
+            final int serial = c.getserial();
 
             //外层包裹一个FrameLayout 方便为TextView设置padding，保证课程信息与边框有一定距离(2dp)
             fl = new FrameLayout(getContext());
@@ -64,7 +64,7 @@ public class CourseTableView extends RelativeLayout {
             flp = new FrameLayout.LayoutParams(notFirstEveryColumnsWidth,
                     notFirstEveryRowHeight * c.getSpanNum());
             //设置横向和纵向的偏移量，和上面介绍的一致，但day和jieci都是从1开始的，需减1.
-            flp.setMargins((Day - 1) * notFirstEveryColumnsWidth, (Classtimes - 1) * notFirstEveryRowHeight, 0, 0);
+            flp.setMargins((day - 1) * notFirstEveryColumnsWidth, (schedule - 1) * notFirstEveryRowHeight, 0, 0);
             fl.setLayoutParams(flp);
             fl.setPadding(twoW, twoW, twoW, twoW);
 
@@ -72,7 +72,7 @@ public class CourseTableView extends RelativeLayout {
             flp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 
 
-            tv.setText( c.getClassroom()+ "\n"+ Num+ "  "+ c.getName()+ "\n" + c.getDes());//顯示內容
+            tv.setText( c.getroom()+ "\n"+ serial+ "\n"+ c.getname()+ "\n" + c.getteacher());//顯示內容
 
 
             tv.setTextColor(Color.WHITE);
@@ -84,14 +84,14 @@ public class CourseTableView extends RelativeLayout {
             tv.setEllipsize(TextUtils.TruncateAt.END);
             //設定最大顯示7行
             tv.setLines(8);  //調格子內最大顯示行數 預設是7
-            tv.setBackgroundResource(COURSE_BG[Day - 1]);
+            tv.setBackgroundResource(COURSE_BG[day - 1]);
             tv.setLayoutParams(flp);
             tv.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //課程資訊設置點擊事件監聽
                     if (onCourseItemClickListener != null)
-                        onCourseItemClickListener.onCourseItemClick((TextView) v, Classtimes, Day, c.getClassroom(), Num,c.getName(), c.getDes());//int Classtimes, int Day, String Classroom, int Num, String Name, String Teacher, String des
+                        onCourseItemClickListener.onCourseItemClick((TextView) v, schedule, day, c.getroom(), serial,c.getname(), c.getteacher());//int Classtimes, int Day, String Classroom, int Num, String Name, String Teacher, String des
                 }
             });
             fl.addView(tv);
@@ -157,8 +157,6 @@ public class CourseTableView extends RelativeLayout {
     private TextView firstTv;
     //2dp
     private int twoW = DensityUtils.dip2px(getContext(), 2);
-    //20dp
-    private int twenty = DensityUtils.dip2px(getContext(), 20);
     //1dp
     private int oneW = DensityUtils.dip2px(getContext(), 1);
 
