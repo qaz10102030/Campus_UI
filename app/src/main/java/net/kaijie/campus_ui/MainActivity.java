@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.location.LocationManager;
@@ -68,14 +69,16 @@ public class MainActivity extends AppCompatActivity
         //rabbit
         implements OnMapReadyCallback,
         GoogleMap.OnMarkerClickListener,
-        GoogleMap.OnMapClickListener
+        GoogleMap.OnMapClickListener,
+        View.OnClickListener
         ////////////
 {
+    //kaijie
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
     private ArrayList<PageView> pageList;
     private CourseTableView courseTableView;
-
+    ///////////
     //rabbit
     private GoogleMap mMap;
     private Marker singleMarker;
@@ -119,63 +122,44 @@ public class MainActivity extends AppCompatActivity
         rabbit();
         /////////////////////////////////
     }
-
+    //kaijie
     public void initclass() {
 
         List<Course> list = new ArrayList<>();
         Course c1 = new Course();
-        c1.setday(1);
-        c1.setroom("EB109");
-        c1.setserial(2163);
-        c1.setname("作業系統");
-        c1.setteacher("陳士煜老師");
-        c1.setschedule(2);
-        c1.setSpanNum(2);
+        c1.setday(5)
+            .setroom("EB109")
+            .setserial("0411")
+            .setname("英文溝通實務（一）")
+            .setname_eng("Practicum in English Communication（Ι）")
+            .setclassfor("四工程一A")
+            .setrequire("必修")
+            .setrequire_eng("Required")
+            .setcredits("0-2-1")
+            .setteacher("王于瑞")
+            .setschedule(5)
+            .setSpanNum(2);
         list.add(c1);
 
-        Course c2 = new Course();
-        c2.setday(2);
-        c2.setroom("EB109");
-        c2.setserial(2163);
-        c2.setname("作業系統");
-        c2.setteacher("陳士煜老師");
-        c2.setschedule(2);
-        c2.setSpanNum(2);
-        list.add(c2);
 
-        Course c3 = new Course();
-        c3.setday(3);
-        c3.setroom("EB109");
-        c3.setserial(2163);
-        c3.setname("作業系統");
-        c3.setteacher("陳士煜老師");
-        c3.setschedule(2);
-        c3.setSpanNum(2);
-        list.add(c3);
+      /*  c1.setday(5);
+        c1.setroom("EB109");
+        c1.setserial("0411");
+        c1.setname("英文溝通實務（一）");
+        c1.setname_eng("Practicum in English Communication（Ι）");
+        c1.setclassfor("四工程一A");
+        c1.setrequire("必修");
+        c1.setrequire_eng("Required");
+        c1.setcredits("0-2-1");
+        c1.setteacher("王于瑞");
+        c1.setschedule(5);
+        c1.setSpanNum(2);
+        list.add(c1);
+*/
 
-
-        Course c4 = new Course();
-        c4.setday(4);
-        c4.setroom("EB109");
-        c4.setserial(2163);
-        c4.setname("作業系統");
-        c4.setteacher("陳士煜老師");
-        c4.setschedule(2);
-        c4.setSpanNum(2);
-        list.add(c4);
-
-        Course c5 = new Course();
-        c5.setday(5);
-        c5.setroom("EB109");
-        c5.setserial(2163);
-        c5.setname("作業系統");
-        c5.setteacher("陳士煜老師");
-        c5.setschedule(2);
-        c5.setSpanNum(2);
-        list.add(c5);
         courseTableView.setOnCourseItemClickListener(new CourseTableView.OnCourseItemClickListener() {
             @Override
-            public void onCourseItemClick(TextView tv, int schedule, int day, String room,int serial, String name, String teacher) {
+            public void onCourseItemClick(TextView tv,int schedule, int day, String room,String serial, String name, String name_eng, String class_for, String require, String require_eng, String credits, String teacher,int spanNum) {
             try {
                 ArrayList<String> result_dialog = new ArrayList<>(); //宣告動態陣列，用來存課程項目跟資料組合後的字串
                 LayoutInflater inflater = LayoutInflater.from(MainActivity.this); //LayoutInflater的目的是將自己設計xml的Layout轉成View
@@ -191,9 +175,12 @@ public class MainActivity extends AppCompatActivity
                 result_dialog.clear(); //再把要存組合字串的陣列內容清空
                 result_dialog.add("上課教室：" + room);
                 result_dialog.add("課號：" + serial);
-                result_dialog.add("課程名稱：" + name);
-                result_dialog.add("授課老師：" + teacher);
-                result_dialog.add("教學大綱網站：\n" + course_plan);
+                result_dialog.add("課程名稱：" + name +"\n( "+ name_eng+ " )");
+                result_dialog.add("上課節數：" + spanNum);
+                result_dialog.add("開課班級：" + class_for);
+                result_dialog.add("修別：" + require +"( "+ require_eng+ " )");
+                result_dialog.add("學分組合：" + credits+"\n( 講授時數-實習時數-學分數 )");
+                result_dialog.add("授課老師：" + teacher+"老師");
                 for(int a = 0;a<result_dialog.size();a++) //把陣列內的資料丟給清單顯示
                 {
                     ClassInfo.add(result_dialog.get(a)); //將資料加到陣列裡
@@ -242,6 +229,19 @@ public class MainActivity extends AppCompatActivity
         mViewPager = (ViewPager)findViewById(R.id.viewpager);
         mViewPager.setAdapter(new SamplePagerAdapter());
 
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        switch (id){
+            case R.id.menu_item:
+
+                break;
+            case R.id.menu_item1:
+
+                break;
+        }
     }
 
     class SamplePagerAdapter extends PagerAdapter{
@@ -337,6 +337,12 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+
+    public void class_database() {
+        SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(getFilesDir() + "class_database.db", null);
+
+    }
+//////////
     //rabbit
     @Override
     public void onMapReady(GoogleMap googleMap) {

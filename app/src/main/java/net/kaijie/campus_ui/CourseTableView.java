@@ -40,7 +40,7 @@ public class CourseTableView extends RelativeLayout {
     private OnCourseItemClickListener onCourseItemClickListener;
     //點擊課程的監聽事件 設定TextView內容格式
     public interface OnCourseItemClickListener {
-        void onCourseItemClick(TextView tv, int schedule, int day, String room,int serial,String name, String teacher);
+        void onCourseItemClick(TextView tv, int schedule, int day, String room,String serial, String name, String name_eng, String class_for, String require, String require_eng, String credits, String teacher,int spanNum);
     }
 
 
@@ -56,7 +56,6 @@ public class CourseTableView extends RelativeLayout {
             //取得星期（等於列）
             final int day = c.getday();
 
-            final int serial = c.getserial();
 
             //外层包裹一个FrameLayout 方便为TextView设置padding，保证课程信息与边框有一定距离(2dp)
             fl = new FrameLayout(getContext());
@@ -72,7 +71,7 @@ public class CourseTableView extends RelativeLayout {
             flp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 
 
-            tv.setText( c.getroom()+ "\n"+ serial+ "\n"+ c.getname()+ "\n" + c.getteacher());//顯示內容
+            tv.setText( c.getroom()+ "\n"+ c.getserial()+ "\n"+ c.getname()+ "\n" + c.getteacher()+"老師");//顯示內容
 
 
             tv.setTextColor(Color.WHITE);
@@ -91,7 +90,7 @@ public class CourseTableView extends RelativeLayout {
                 public void onClick(View v) {
                     //課程資訊設置點擊事件監聽
                     if (onCourseItemClickListener != null)
-                        onCourseItemClickListener.onCourseItemClick((TextView) v, schedule, day, c.getroom(), serial,c.getname(), c.getteacher());//int Classtimes, int Day, String Classroom, int Num, String Name, String Teacher, String des
+                        onCourseItemClickListener.onCourseItemClick((TextView) v, schedule, day, c.getroom(), c.getserial(), c.getname(), c.getname_eng(), c.getclass_for(), c.getrequire(), c.getrequire_eng(), c.getcredits(),c.getteacher(), c.getSpanNum());//int schedule, int day, String room,int serial, String name, String name_eng, String class_for, String require, String require_eng, String credits, String teacher,int spanNum
                 }
             });
             fl.addView(tv);
