@@ -1,11 +1,13 @@
 package net.kaijie.campus_ui;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.location.LocationManager;
@@ -51,11 +53,14 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
 
+import net.kaijie.campus_ui.HttpRequest.HttpRequest;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
@@ -97,9 +102,12 @@ public class MainActivity extends AppCompatActivity
     private static final String trash_state = "trash_state";
     private static final String toilet_state = "toilet_state";
     private static final String college_state = "college_state";
+    private static final String isCourseDataReady = "isCourseDataReady";
     private static final int REQUEST_PERMISSION = 99; //設定權限是否設定成功的檢查碼
     private static Boolean isExit = false;
     private static Boolean hasTask = false;
+    private HttpRequest httpRequest;
+    private ProgressDialog proDialog;
     //////////////////////
 
     @Override
@@ -128,17 +136,17 @@ public class MainActivity extends AppCompatActivity
         List<Course> list = new ArrayList<>();
         Course c1 = new Course();
         c1.setday(5)
-            .setroom("EB109")
-            .setserial("0411")
-            .setname("英文溝通實務（一）")
-            .setname_eng("Practicum in English Communication（Ι）")
-            .setclassfor("四工程一A")
-            .setrequire("必修")
-            .setrequire_eng("Required")
-            .setcredits("0-2-1")
-            .setteacher("王于瑞")
-            .setschedule(5)
-            .setSpanNum(2);
+                .setroom("EB109")
+                .setserial("0411")
+                .setname("英文溝通實務（一）")
+                .setname_eng("Practicum in English Communication（Ι）")
+                .setclassfor("四工程一A")
+                .setrequire("必修")
+                .setrequire_eng("Required")
+                .setcredits("0-2-1")
+                .setteacher("王于瑞")
+                .setschedule(5)
+                .setSpanNum(2);
         list.add(c1);
 
 
@@ -228,7 +236,6 @@ public class MainActivity extends AppCompatActivity
     private void initView() {
         mViewPager = (ViewPager)findViewById(R.id.viewpager);
         mViewPager.setAdapter(new SamplePagerAdapter());
-
     }
 
     @Override
@@ -291,10 +298,6 @@ public class MainActivity extends AppCompatActivity
             courseTableView = (CourseTableView) view.findViewById(R.id.ctv);
             initclass();
 
-            //rabbit
-
-            ///////////////////////////////////////
-
         }
     }
     public class PageThreeView extends PageView{
@@ -335,12 +338,6 @@ public class MainActivity extends AppCompatActivity
             textView.setText("Page five");
             addView(view);
         }
-    }
-
-
-    public void class_database() {
-        SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(getFilesDir() + "class_database.db", null);
-
     }
 //////////
     //rabbit
@@ -440,6 +437,134 @@ public class MainActivity extends AppCompatActivity
 
         buildkind = CommonMethod.Buildingkind();
         mapArea = CommonMethod.BuildingArea();
+
+        //建立Request物件
+        httpRequest = new HttpRequest(MainActivity.this);
+        boolean courseReady = settings.getBoolean(isCourseDataReady,false);
+        if(!checkCourseData() || !courseReady){
+            final boolean[] check = {false};
+            new AlertDialog.Builder(MainActivity.this) //宣告對話框物件，並顯示課程資料
+                    .setTitle("初次使用")
+                    .setMessage("是否下載課程資料?")
+                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    })
+                    .setPositiveButton("下載", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            check[0] = true;
+                            //使用方法取課表
+                            httpRequest.getCourse(callback);
+                            proDialog = ProgressDialog.show(MainActivity.this,"請稍候", "正在為您下載課程資料...",true);
+                        }
+                    })
+                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            if(!check[0]){
+                                Toast.makeText(MainActivity.this,"無課程資料將使部分功能無法使用",Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }).show();
+        }
+    }
+    private boolean checkCourseData() {
+        SQLiteDatabase checkDB;
+        try {
+            checkDB = SQLiteDatabase.openDatabase(getFilesDir() + "class_database.db", null,
+                    SQLiteDatabase.OPEN_READONLY);
+            checkDB.close();
+            Log.e("database","db exsist");
+        } catch (SQLiteException e) {
+            Log.e("database",e.getMessage());
+            return false;
+        }
+        return true;
+    }
+    private void analysis_course(String course_data) {
+        ArrayList<Course> courseArray = new ArrayList<>();
+        Course course = new Course();
+        try {
+            JSONArray array = new JSONArray(course_data);
+            String index[] = {"W","X","A","B","C","D","Y","E","F","G","H","Z","I"};
+            for (int i = 0; i < array.length(); i++) {
+                String serial = array.getJSONObject(i).optString("serial");
+                String name = array.getJSONObject(i).optString("name");
+                String schedule = array.getJSONObject(i).optString("schedule");
+                int schedule_index = 0;
+                if(!schedule.equals("")){
+                    schedule_index = Arrays.asList(index).indexOf(schedule.substring(0,1));
+                }
+                String room = array.getJSONObject(i).optString("room");
+                String teacher = array.getJSONObject(i).optString("tescher");
+                String day = array.getJSONObject(i).optString("day");
+                int day_index = 0;
+                if(!day.equals("")){
+                    day_index = Integer.parseInt(day);
+                }
+                int spanNum = array.getJSONObject(i).optInt("class_span");
+                course.setserial(serial)
+                        .setname(name)
+                        .setschedule(schedule_index)
+                        .setroom(room)
+                        .setteacher(teacher)
+                        .setday(day_index)
+                        .setSpanNum(spanNum);
+                courseArray.add(course);
+            }
+            Log.d("Course","OK");
+            createCourseDatabase(courseArray);
+        } catch (JSONException e) {
+            proDialog.dismiss();
+            Toast.makeText(MainActivity.this,"課程資料分析出錯QQ",Toast.LENGTH_SHORT).show();
+            Log.e("analysis_course",e.getMessage());
+        }
+    }
+    public void createCourseDatabase(ArrayList<Course> data) {
+        SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(getFilesDir() + "class_database.db", null);
+        try {
+            String createSql = "create table tb_course (_id integer primary key autoincrement" +
+                    ",name varchar(50)" +
+                    ",name_eng varchar(50)" +
+                    ",serial varchar(10)" +
+                    ",room varchar(10)" +
+                    ",classfor varchar(10)" +
+                    ",schedule varchar(5)" +
+                    ",SpanNum varchar(5)" +
+                    ",teacher varchar(10)" +
+                    ",require varchar(5)" +
+                    ",require_eng varchar(10)" +
+                    ",credits varchar(10)" +
+                    ")";
+            db.execSQL(createSql);
+
+            String insertSql = "insert into tb_course values (null,?,?,?,?,?,?,?,?,?,?,?)";
+            for (int i = 0; i < data.size(); i++) {
+                Course obj = data.get(i);
+                db.execSQL(insertSql,
+                        new String[]{obj.getname(),
+                                obj.getname_eng(),
+                                obj.getserial(),
+                                obj.getroom(),
+                                obj.getclass_for(),
+                                obj.getschedule() + "",
+                                obj.getSpanNum() + "",
+                                obj.getteacher(),
+                                obj.getrequire(),
+                                obj.getrequire_eng(),
+                                obj.getcredits()});
+            }
+            proDialog.dismiss();
+            settings.edit().putBoolean(isCourseDataReady,true).apply();
+            Log.d("course", "data create suceess");
+        }
+        catch (SQLiteException e){
+            proDialog.dismiss();
+            Log.d("SQLite", "資料庫建立出錯....");
+        }
+
     }
     private void addArea() {
         PolygonOptions polygonOptions;
@@ -691,6 +816,20 @@ public class MainActivity extends AppCompatActivity
         public void run() {
             isExit = false;
             hasTask = true;
+        }
+    };
+    public HttpRequest.VolleyCallback callback = new HttpRequest.VolleyCallback() {
+        @Override
+        public void onSuccess(String label, String result) {
+            //分析課程資料
+            analysis_course(result);
+        }
+
+        @Override
+        public void onError(String error) {
+            proDialog.dismiss();
+            Toast.makeText(MainActivity.this,"伺服器出錯啦><",Toast.LENGTH_SHORT).show();
+            Log.d("Volley",error);
         }
     };
     //////////////////////

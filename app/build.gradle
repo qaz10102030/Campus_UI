@@ -29,4 +29,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.google.android.gms:play-services:9.4.0'
     compile 'com.github.clans:fab:1.6.4'
+    compile group: 'com.mcxiaoke.volley', name: 'library', version: '1.0.19'
 }
