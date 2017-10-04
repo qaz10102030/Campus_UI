@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
@@ -246,12 +248,17 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initData() {
+
+
+
+
+
         mTabLayout = (android.support.design.widget.TabLayout)findViewById(R.id.tabs);
-        mTabLayout.addTab(mTabLayout.newTab().setText("個人").setIcon(R.mipmap.ic_yuntech));
-        mTabLayout.addTab(mTabLayout.newTab().setText("課程").setIcon(R.mipmap.ic_yuntech));
-        mTabLayout.addTab(mTabLayout.newTab().setText("地圖").setIcon(R.mipmap.ic_yuntech));
-        mTabLayout.addTab(mTabLayout.newTab().setText("運動").setIcon(R.mipmap.ic_yuntech));
-        mTabLayout.addTab(mTabLayout.newTab().setText("聊天").setIcon(R.mipmap.ic_yuntech));
+        mTabLayout.addTab(mTabLayout.newTab().setText("個人").setIcon(R.drawable.ic_person));
+        mTabLayout.addTab(mTabLayout.newTab().setText("課程").setIcon(R.drawable.ic_class));
+        mTabLayout.addTab(mTabLayout.newTab().setText("地圖").setIcon(R.drawable.ic_yuntech));
+        mTabLayout.addTab(mTabLayout.newTab().setText("運動").setIcon(R.drawable.ic_sport));
+        mTabLayout.addTab(mTabLayout.newTab().setText("聊天").setIcon(R.drawable.ic_chat));
         //取得TabLayout
         LinearLayout linearLayout=(LinearLayout)mTabLayout.getChildAt(0);
         linearLayout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
