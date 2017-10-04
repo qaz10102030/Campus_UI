@@ -99,7 +99,7 @@ public class CourseTableView extends RelativeLayout {
             flCourseContent.addView(fl);
         }
     }
-    private void clearViewsIfNeeded() {
+    public void clearViewsIfNeeded() {
         if (myCacheViews == null || myCacheViews.isEmpty())
             return;
 

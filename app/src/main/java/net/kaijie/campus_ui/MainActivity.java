@@ -131,9 +131,9 @@ public class MainActivity extends AppCompatActivity
         /////////////////////////////////
     }
     //kaijie
-    public void initclass() {
+    public void initclass()  {
 
-        List<Course> list = new ArrayList<>();
+        final List<Course> list = new ArrayList<>();
         Course c1 = new Course();
         c1.setday(5)
                 .setroom("EB109")
@@ -148,6 +148,20 @@ public class MainActivity extends AppCompatActivity
                 .setschedule(5)
                 .setSpanNum(2);
         list.add(c1);
+        Course c2 = new Course();
+        c2.setday(2)
+                .setroom("EB109")
+                .setserial("0215")
+                .setname("英文溝通實務（一）")
+                .setname_eng("Practicum in English Communication（Ι）")
+                .setclassfor("四工程一A")
+                .setrequire("必修")
+                .setrequire_eng("Required")
+                .setcredits("0-2-1")
+                .setteacher("王于瑞")
+                .setschedule(3)
+                .setSpanNum(2);
+        list.add(c2);
 
 
       /*  c1.setday(5);
@@ -167,7 +181,7 @@ public class MainActivity extends AppCompatActivity
 
         courseTableView.setOnCourseItemClickListener(new CourseTableView.OnCourseItemClickListener() {
             @Override
-            public void onCourseItemClick(TextView tv,int schedule, int day, String room,String serial, String name, String name_eng, String class_for, String require, String require_eng, String credits, String teacher,int spanNum) {
+            public void onCourseItemClick(TextView tv, int schedule, int day, String room, final String serial, String name, String name_eng, String class_for, String require, String require_eng, String credits, String teacher, int spanNum) {
             try {
                 ArrayList<String> result_dialog = new ArrayList<>(); //宣告動態陣列，用來存課程項目跟資料組合後的字串
                 LayoutInflater inflater = LayoutInflater.from(MainActivity.this); //LayoutInflater的目的是將自己設計xml的Layout轉成View
@@ -199,6 +213,26 @@ public class MainActivity extends AppCompatActivity
                 new AlertDialog.Builder(MainActivity.this) //宣告對話框物件，並顯示課程資料
                         .setTitle("詳細資料")
                         .setView(class_view)
+                        .setNegativeButton("刪除", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                Toast.makeText(MainActivity.this, "已刪除", Toast.LENGTH_SHORT).show();
+                                courseTableView.clearViewsIfNeeded();
+                                Course compare_c=new Course();
+                                compare_c.setserial(serial);
+                                int remove_c=0;
+                                for (int j = 0; j <list.size() ; j++) {
+                                    if(list.get(j).getserial()==compare_c.getserial()){
+                                        remove_c=j;
+                                    }
+                                }
+                                list.remove(remove_c);
+
+                                courseTableView.updateCourseViews(list);
+
+
+                            }
+                        })
                         .setPositiveButton("離開", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -488,7 +522,7 @@ public class MainActivity extends AppCompatActivity
         Course course = new Course();
         try {
             JSONArray array = new JSONArray(course_data);
-            String index[] = {"W","X","A","B","C","D","Y","E","F","G","H","Z","I"};
+            String index[] = {"empty","W","X","A","B","C","D","Y","E","F","G","H","Z","I"};
             for (int i = 0; i < array.length(); i++) {
                 String serial = array.getJSONObject(i).optString("serial");
                 String name = array.getJSONObject(i).optString("name");
