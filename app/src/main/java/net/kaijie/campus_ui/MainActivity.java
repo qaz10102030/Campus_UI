@@ -43,6 +43,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.clans.fab.FloatingActionButton;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -69,6 +70,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.MANAGE_DOCUMENTS;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
@@ -284,10 +286,10 @@ public class MainActivity extends AppCompatActivity
         int id = view.getId();
         switch (id){
             case R.id.menu_item:
-
-                break;
-            case R.id.menu_item1:
-
+                Toast.makeText(MainActivity.this,"新增課程",Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this,AddCourseActivity.class);
+                startActivity(intent);
                 break;
         }
     }
@@ -337,6 +339,8 @@ public class MainActivity extends AppCompatActivity
             View view = LayoutInflater.from(context).inflate(R.layout.tab_2, null);
             addView(view);
             courseTableView = (CourseTableView) view.findViewById(R.id.ctv);
+            FloatingActionButton floatingActionButton = (FloatingActionButton)view.findViewById(R.id.menu_item);
+            floatingActionButton.setOnClickListener(MainActivity.this);
             initclass();
 
         }
@@ -483,33 +487,36 @@ public class MainActivity extends AppCompatActivity
         httpRequest = new HttpRequest(MainActivity.this);
         boolean courseReady = settings.getBoolean(isCourseDataReady,false);
         if(!checkCourseData() || !courseReady){
-            final boolean[] check = {false};
-            new AlertDialog.Builder(MainActivity.this) //宣告對話框物件，並顯示課程資料
-                    .setTitle("初次使用")
-                    .setMessage("是否下載課程資料?")
-                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
-                    })
-                    .setPositiveButton("下載", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            check[0] = true;
-                            //使用方法取課表
-                            httpRequest.getCourse(callback);
-                            proDialog = ProgressDialog.show(MainActivity.this,"請稍候", "正在為您下載課程資料...",true);
-                        }
-                    })
-                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                            if(!check[0]){
-                                Toast.makeText(MainActivity.this,"無課程資料將使部分功能無法使用",Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }).show();
+            downloadCourse();
         }
+    }
+    private void downloadCourse(){
+        final boolean[] check = {false};
+        new AlertDialog.Builder(MainActivity.this) //宣告對話框物件，並顯示課程資料
+                .setTitle("初次使用")
+                .setMessage("是否下載課程資料?")
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .setPositiveButton("下載", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        check[0] = true;
+                        //使用方法取課表
+                        httpRequest.getCourse(callback);
+                        proDialog = ProgressDialog.show(MainActivity.this,"請稍候", "正在為您下載課程資料...",true);
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        if(!check[0]){
+                            Toast.makeText(MainActivity.this,"無課程資料將使部分功能無法使用",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }).show();
     }
     private boolean checkCourseData() {
         SQLiteDatabase checkDB;

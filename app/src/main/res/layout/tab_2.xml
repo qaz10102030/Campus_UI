@@ -42,19 +42,11 @@
             android:id="@+id/menu_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/icon_share"
+            android:src="@drawable/ic_course_add"
             fab:fab_size="mini"
             fab:fab_colorNormal="@color/add_bg_color"
-            fab:fab_colorPressed="@color/add_selected_color"/>
-
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/menu_item1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/icon_like"
-            fab:fab_size="mini"
-            fab:fab_colorNormal="@color/add_bg_color"
-            fab:fab_colorPressed="@color/add_selected_color"/>
+            fab:fab_colorPressed="@color/add_selected_color"
+            fab:fab_label="新增課程"/>
 
     </com.github.clans.fab.FloatingActionMenu>
 
