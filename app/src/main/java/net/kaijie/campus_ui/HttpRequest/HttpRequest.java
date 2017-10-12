@@ -2,6 +2,7 @@ package net.kaijie.campus_ui.HttpRequest;
 
 import android.content.Context;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -15,6 +16,7 @@ public class HttpRequest {
     private String Server = "http://140.125.33.140:3030";
     private RequestQueue mQueue;
     private StringRequest getRequest;
+    private int VolleyTimeOut = 20000;
     private VolleyCallback volleycallback;
 
     public Response.ErrorListener errorlistener = new Response.ErrorListener() {
@@ -38,6 +40,7 @@ public class HttpRequest {
                         volleycallback.onSuccess("queue", response);
                     }
                 }, errorlistener);
+        getRequest.setRetryPolicy(new DefaultRetryPolicy(VolleyTimeOut,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         mQueue.add(getRequest);
     }
 

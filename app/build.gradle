@@ -10,6 +10,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -30,4 +31,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:9.4.0'
     compile 'com.github.clans:fab:1.6.4'
     compile group: 'com.mcxiaoke.volley', name: 'library', version: '1.0.19'
+    compile 'com.android.support:multidex:1.0.1'
 }

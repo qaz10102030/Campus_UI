@@ -37,9 +37,11 @@ public class CourseAdapter extends ArrayAdapter<Course> {
         TextView tv_require = (TextView) convertView.findViewById(R.id.tv_require);
         TextView tv_name = (TextView) convertView.findViewById(R.id.tv_name);
         TextView tv_teacher = (TextView) convertView.findViewById(R.id.tv_teacher);
-        tv_day.setText(courseObj.getday());
+        String forDay = courseObj.getday() + "";
+        String forSchedule = courseObj.getschedule() + "";
+        tv_day.setText(forDay);
         tv_serial.setText(courseObj.getserial());
-        tv_schedule.setText(courseObj.getschedule());
+        tv_schedule.setText(forSchedule);
         tv_require.setText(courseObj.getrequire());
         tv_name.setText(courseObj.getname());
         tv_teacher.setText(courseObj.getteacher());

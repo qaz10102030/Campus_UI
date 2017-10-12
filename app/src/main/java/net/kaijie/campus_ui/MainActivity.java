@@ -19,6 +19,7 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.multidex.MultiDex;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -581,14 +582,15 @@ public class MainActivity extends AppCompatActivity
                     ",classfor varchar(10)" +
                     ",schedule varchar(5)" +
                     ",SpanNum varchar(5)" +
-                    ",teacher varchar(10)" +
-                    ",require varchar(5)" +
+                    ",teacher varchar(50)" +
+                    ",require varchar(50)" +
                     ",require_eng varchar(10)" +
                     ",credits varchar(10)" +
+                    ",day varchar(2)" +
                     ")";
             db.execSQL(createSql);
 
-            String insertSql = "insert into tb_course values (null,?,?,?,?,?,?,?,?,?,?,?)";
+            String insertSql = "insert into tb_course values (null,?,?,?,?,?,?,?,?,?,?,?,?)";
             for (int i = 0; i < data.size(); i++) {
                 Course obj = data.get(i);
                 db.execSQL(insertSql,
@@ -602,7 +604,8 @@ public class MainActivity extends AppCompatActivity
                                 obj.getteacher(),
                                 obj.getrequire(),
                                 obj.getrequire_eng(),
-                                obj.getcredits()});
+                                obj.getcredits(),
+                                obj.getday() + ""});
             }
             proDialog.dismiss();
             settings.edit().putBoolean(isCourseDataReady,true).apply();
@@ -880,5 +883,10 @@ public class MainActivity extends AppCompatActivity
             Log.d("Volley",error);
         }
     };
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
     //////////////////////
 }
