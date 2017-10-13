@@ -13,15 +13,16 @@ public class Course implements Serializable  {
     private String room; //課程教室
     private String serial;        //課程課號
     private String name;    //課程名稱
-    private String name_eng;;    //課程名稱英文
+    private String name_eng;    //課程名稱英文
     private String class_for; //開課班級
     private String require; //必修選修
     private String require_eng;  //英文必修選修
     private String credits; //學分組合
     private String teacher;      //課程老師
     private int spanNum ;// 默認跨每個課程跨越兩節(待修改)
+    private String schedule_display;
 
-    public Course (int schedule, int day, String room,String serial, String name, String name_eng, String class_for, String require, String require_eng, String credits, String teacher,int spanNum){
+    public Course (int schedule, int day, String room,String serial, String name, String name_eng, String class_for, String require, String require_eng, String credits, String teacher,int spanNum,String schedule_display){
         this.schedule = schedule;
         this.day=day;
         this.room=room;
@@ -34,7 +35,7 @@ public class Course implements Serializable  {
         this.credits=credits;
         this.teacher = teacher;
         this.spanNum = spanNum;
-
+        this.schedule_display = schedule_display;
     }
     public Course(){
    }
@@ -43,6 +44,12 @@ public class Course implements Serializable  {
     }
 
     public Course setschedule(int schedule) {this.schedule = schedule; return Course.this;}
+
+    public String getschedule_display() {
+        return schedule_display;
+    }
+
+    public Course setschedule_display(String schedule_display) {this.schedule_display = schedule_display; return Course.this;}
 
     public int getday() {
         return day;

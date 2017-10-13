@@ -53,13 +53,13 @@ public class AddCourseActivity extends AppCompatActivity implements SearchView.O
         String selectCourse = "select * from tb_course";
         try {
             Cursor cursor = db.rawQuery(selectCourse,null);
-            Course tempCourse = new Course();
             cursor.moveToFirst();
             for (int i = 0; i < cursor.getCount(); i++) {
+                Course tempCourse = new Course();
                 tempCourse.setday(cursor.getInt(12))
                         .setname(cursor.getString(1))
                         .setrequire(cursor.getString(9))
-                        .setschedule(cursor.getInt(6))
+                        .setschedule_display(cursor.getString(13))
                         .setserial(cursor.getString(3))
                         .setteacher(cursor.getString(8));
                 courseAdapter.add(tempCourse);

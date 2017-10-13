@@ -534,7 +534,6 @@ public class MainActivity extends AppCompatActivity
     }
     private void analysis_course(String course_data) {
         ArrayList<Course> courseArray = new ArrayList<>();
-        Course course = new Course();
         try {
             JSONArray array = new JSONArray(course_data);
             String index[] = {"empty","W","X","A","B","C","D","Y","E","F","G","H","Z","I"};
@@ -547,20 +546,24 @@ public class MainActivity extends AppCompatActivity
                     schedule_index = Arrays.asList(index).indexOf(schedule.substring(0,1));
                 }
                 String room = array.getJSONObject(i).optString("room");
-                String teacher = array.getJSONObject(i).optString("tescher");
+                String teacher = array.getJSONObject(i).optString("teacher");
                 String day = array.getJSONObject(i).optString("day");
                 int day_index = 0;
                 if(!day.equals("")){
                     day_index = Integer.parseInt(day);
                 }
                 int spanNum = array.getJSONObject(i).optInt("class_span");
+                String require = array.getJSONObject(i).optString("require");
+                Course course = new Course();
                 course.setserial(serial)
                         .setname(name)
                         .setschedule(schedule_index)
                         .setroom(room)
                         .setteacher(teacher)
                         .setday(day_index)
-                        .setSpanNum(spanNum);
+                        .setrequire(require)
+                        .setSpanNum(spanNum)
+                        .setschedule_display(schedule);
                 courseArray.add(course);
             }
             Log.d("Course","OK");
@@ -587,10 +590,11 @@ public class MainActivity extends AppCompatActivity
                     ",require_eng varchar(10)" +
                     ",credits varchar(10)" +
                     ",day varchar(2)" +
+                    ",schedule_display varchar(10)" +
                     ")";
             db.execSQL(createSql);
 
-            String insertSql = "insert into tb_course values (null,?,?,?,?,?,?,?,?,?,?,?,?)";
+            String insertSql = "insert into tb_course values (null,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             for (int i = 0; i < data.size(); i++) {
                 Course obj = data.get(i);
                 db.execSQL(insertSql,
@@ -605,7 +609,8 @@ public class MainActivity extends AppCompatActivity
                                 obj.getrequire(),
                                 obj.getrequire_eng(),
                                 obj.getcredits(),
-                                obj.getday() + ""});
+                                obj.getday() + "",
+                                obj.getschedule_display()});
             }
             proDialog.dismiss();
             settings.edit().putBoolean(isCourseDataReady,true).apply();
