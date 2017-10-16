@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">I am Yuntech</string>
     <string name="day">day</string>
+    <string name="actionbar_title">課程列表</string>
 </resources>

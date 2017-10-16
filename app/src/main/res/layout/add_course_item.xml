@@ -20,8 +20,8 @@
             android:layout_below="@+id/imageView2"
             android:layout_toEndOf="@+id/imageView2"
             android:layout_marginTop="3dp"
-            android:maxEms="7"
-            android:ems="7"
+            android:maxEms="3"
+            android:ems="3"
             android:ellipsize="end"
             android:singleLine="true"/>
 
@@ -128,6 +128,24 @@
             android:src="@drawable/course_item_name"
             android:layout_below="@+id/imageView4"
             android:layout_alignStart="@+id/imageView4" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView7"
+            android:src="@drawable/course_item_dept"
+            android:layout_below="@+id/imageView5"
+            android:layout_alignStart="@+id/imageView5" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="0"
+            android:id="@+id/tv_classfor"
+            android:layout_alignTop="@+id/imageView7"
+            android:layout_toEndOf="@+id/imageView7"
+            android:layout_marginTop="3dp" />
     </RelativeLayout>
 
 </RelativeLayout>

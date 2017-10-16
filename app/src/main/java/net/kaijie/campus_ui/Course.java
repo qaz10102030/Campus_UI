@@ -21,6 +21,8 @@ public class Course implements Serializable  {
     private String teacher;      //課程老師
     private int spanNum ;// 默認跨每個課程跨越兩節(待修改)
     private String schedule_display;
+    private boolean isNoClass = false;
+    private boolean forSearch = false;
 
     public Course (int schedule, int day, String room,String serial, String name, String name_eng, String class_for, String require, String require_eng, String credits, String teacher,int spanNum,String schedule_display){
         this.schedule = schedule;
@@ -120,7 +122,17 @@ public class Course implements Serializable  {
 
     public Course setSpanNum(int spanNum) {this.spanNum = spanNum; return Course.this;}
 
+    public boolean getIsNoClasss(){return isNoClass;}
 
+    public void setIsNoClass(boolean isNoClass){
+        this.isNoClass = isNoClass;
+    }
+
+    public boolean getForSearch(){return forSearch;}
+
+    public void setForSearch(boolean forSearch){
+        this.forSearch = forSearch;
+    }
 
   /*  @Override
     public String toString() {

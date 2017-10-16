@@ -554,6 +554,7 @@ public class MainActivity extends AppCompatActivity
                 }
                 int spanNum = array.getJSONObject(i).optInt("class_span");
                 String require = array.getJSONObject(i).optString("require");
+                String classfor = array.getJSONObject(i).optString("class");
                 Course course = new Course();
                 course.setserial(serial)
                         .setname(name)
@@ -563,7 +564,8 @@ public class MainActivity extends AppCompatActivity
                         .setday(day_index)
                         .setrequire(require)
                         .setSpanNum(spanNum)
-                        .setschedule_display(schedule);
+                        .setschedule_display(schedule)
+                        .setclassfor(classfor);
                 courseArray.add(course);
             }
             Log.d("Course","OK");
