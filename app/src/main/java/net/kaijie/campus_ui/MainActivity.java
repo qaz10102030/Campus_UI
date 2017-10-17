@@ -80,7 +80,8 @@ public class MainActivity extends AppCompatActivity
         implements OnMapReadyCallback,
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnMapClickListener,
-        View.OnClickListener
+        View.OnClickListener,
+        CourseTableView.OnCourseItemClickListener
         ////////////
 {
     //kaijie
@@ -88,6 +89,7 @@ public class MainActivity extends AppCompatActivity
     private ViewPager mViewPager;
     private ArrayList<PageView> pageList;
     private CourseTableView courseTableView;
+    private List<Course> list = new ArrayList<>();
     ///////////
     //rabbit
     private GoogleMap mMap;
@@ -135,10 +137,16 @@ public class MainActivity extends AppCompatActivity
         rabbit();
         /////////////////////////////////
     }
+
+    @Override
+    protected void onStart() {
+        Toast.makeText(MainActivity.this,"已觸發",Toast.LENGTH_SHORT).show();
+        super.onStart();
+    }
+
     //kaijie
     public void initclass()  {
 
-        final List<Course> list = new ArrayList<>();
         Course c1 = new Course();
         c1.setday(5)
                 .setroom("EB109")
@@ -153,109 +161,12 @@ public class MainActivity extends AppCompatActivity
                 .setschedule(5)
                 .setSpanNum(2);
         list.add(c1);
-        Course c2 = new Course();
-        c2.setday(2)
-                .setroom("EB109")
-                .setserial("0215")
-                .setname("英文溝通實務（一）")
-                .setname_eng("Practicum in English Communication（Ι）")
-                .setclassfor("四工程一A")
-                .setrequire("必修")
-                .setrequire_eng("Required")
-                .setcredits("0-2-1")
-                .setteacher("王于瑞")
-                .setschedule(3)
-                .setSpanNum(2);
-        list.add(c2);
 
-
-      /*  c1.setday(5);
-        c1.setroom("EB109");
-        c1.setserial("0411");
-        c1.setname("英文溝通實務（一）");
-        c1.setname_eng("Practicum in English Communication（Ι）");
-        c1.setclassfor("四工程一A");
-        c1.setrequire("必修");
-        c1.setrequire_eng("Required");
-        c1.setcredits("0-2-1");
-        c1.setteacher("王于瑞");
-        c1.setschedule(5);
-        c1.setSpanNum(2);
-        list.add(c1);
-*/
-
-        courseTableView.setOnCourseItemClickListener(new CourseTableView.OnCourseItemClickListener() {
-            @Override
-            public void onCourseItemClick(TextView tv, int schedule, int day, String room, final String serial, String name, String name_eng, String class_for, String require, String require_eng, String credits, String teacher, int spanNum) {
-            try {
-                ArrayList<String> result_dialog = new ArrayList<>(); //宣告動態陣列，用來存課程項目跟資料組合後的字串
-                LayoutInflater inflater = LayoutInflater.from(MainActivity.this); //LayoutInflater的目的是將自己設計xml的Layout轉成View
-                View class_view = inflater.inflate(R.layout.class_msg, null); //指定要給View表述的Layout
-                ListView into_class = (ListView) class_view.findViewById(R.id.into_class); //定義顯示課程資訊的清單物件
-                ArrayAdapter ClassInfo = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1);//設定課程資訊的清單物件要顯示資料的陣列
-                into_class.setAdapter(ClassInfo); //定義顯示課程資訊的清單物件
-
-                String course_plan="True";
-
-             //  final String[] classes_Item = {"上課教室：","課號：","課程名稱：","授課老師：","教學大綱網站：\n"}; //設定存有課程項目的陣列
-                ClassInfo.clear(); //先把清單物件的資料陣列清空
-                result_dialog.clear(); //再把要存組合字串的陣列內容清空
-                result_dialog.add("上課教室：" + room);
-                result_dialog.add("課號：" + serial);
-                result_dialog.add("課程名稱：" + name +"\n( "+ name_eng+ " )");
-                result_dialog.add("上課節數：" + spanNum);
-                result_dialog.add("開課班級：" + class_for);
-                result_dialog.add("修別：" + require +"( "+ require_eng+ " )");
-                result_dialog.add("學分組合：" + credits+"\n( 講授時數-實習時數-學分數 )");
-                result_dialog.add("授課老師：" + teacher+"老師");
-                for(int a = 0;a<result_dialog.size();a++) //把陣列內的資料丟給清單顯示
-                {
-                    ClassInfo.add(result_dialog.get(a)); //將資料加到陣列裡
-                    ClassInfo.notifyDataSetChanged(); //通知陣列資料有被更改
-                    into_class.smoothScrollToPosition(ClassInfo.getCount() - 1); //滑動到最後一項(如果超出畫面)
-                }
-
-                new AlertDialog.Builder(MainActivity.this) //宣告對話框物件，並顯示課程資料
-                        .setTitle("詳細資料")
-                        .setView(class_view)
-                        .setNegativeButton("刪除", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                Toast.makeText(MainActivity.this, "已刪除", Toast.LENGTH_SHORT).show();
-                                courseTableView.clearViewsIfNeeded();
-                                Course compare_c=new Course();
-                                compare_c.setserial(serial);
-                                int remove_c=0;
-                                for (int j = 0; j <list.size() ; j++) {
-                                    if(list.get(j).getserial()==compare_c.getserial()){
-                                        remove_c=j;
-                                    }
-                                }
-                                list.remove(remove_c);
-
-                                courseTableView.updateCourseViews(list);
-
-
-                            }
-                        })
-                        .setPositiveButton("離開", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        }).show();
-            }
-            catch (Exception e){Log.e("dialog",e.toString());}
-            }
-        });
+        courseTableView.setOnCourseItemClickListener(this);
         courseTableView.updateCourseViews(list);
     }
 
     private void initData() {
-
-
-
-
-
         mTabLayout = (android.support.design.widget.TabLayout)findViewById(R.id.tabs);
         mTabLayout.addTab(mTabLayout.newTab().setText("個人").setIcon(R.drawable.ic_person));
         mTabLayout.addTab(mTabLayout.newTab().setText("課程").setIcon(R.drawable.ic_class));
@@ -288,10 +199,81 @@ public class MainActivity extends AppCompatActivity
         switch (id){
             case R.id.menu_item:
                 Toast.makeText(MainActivity.this,"新增課程",Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent();
-                intent.setClass(MainActivity.this,AddCourseActivity.class);
-                startActivity(intent);
+                Intent intent = new Intent(this,AddCourseActivity.class);
+                startActivityForResult(intent,1);
                 break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if(resultCode == RESULT_OK) {
+                Bundle resultBundle = data.getBundleExtra("addCourse");
+                List<Course> temp = resultBundle.getParcelableArrayList("list");
+            }
+        }
+    }
+
+    @Override
+    public void onCourseItemClick(TextView tv, int schedule, int day, String room, final String serial, String name, String name_eng, String class_for, String require, String require_eng, String credits, String teacher, int spanNum) {
+        try {
+            ArrayList<String> result_dialog = new ArrayList<>(); //宣告動態陣列，用來存課程項目跟資料組合後的字串
+            LayoutInflater inflater = LayoutInflater.from(MainActivity.this); //LayoutInflater的目的是將自己設計xml的Layout轉成View
+            View class_view = inflater.inflate(R.layout.class_msg, null); //指定要給View表述的Layout
+            ListView into_class = (ListView) class_view.findViewById(R.id.into_class); //定義顯示課程資訊的清單物件
+            ArrayAdapter ClassInfo = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1);//設定課程資訊的清單物件要顯示資料的陣列
+            into_class.setAdapter(ClassInfo); //定義顯示課程資訊的清單物件
+
+            String course_plan="True";
+
+            //  final String[] classes_Item = {"上課教室：","課號：","課程名稱：","授課老師：","教學大綱網站：\n"}; //設定存有課程項目的陣列
+            ClassInfo.clear(); //先把清單物件的資料陣列清空
+            result_dialog.clear(); //再把要存組合字串的陣列內容清空
+            result_dialog.add("上課教室：" + room);
+            result_dialog.add("課號：" + serial);
+            result_dialog.add("課程名稱：" + name +"\n( "+ name_eng+ " )");
+            result_dialog.add("上課節數：" + spanNum);
+            result_dialog.add("開課班級：" + class_for);
+            result_dialog.add("修別：" + require +"( "+ require_eng+ " )");
+            result_dialog.add("學分組合：" + credits+"\n( 講授時數-實習時數-學分數 )");
+            result_dialog.add("授課老師：" + teacher+"老師");
+            for(int a = 0;a<result_dialog.size();a++) //把陣列內的資料丟給清單顯示
+            {
+                ClassInfo.add(result_dialog.get(a)); //將資料加到陣列裡
+                ClassInfo.notifyDataSetChanged(); //通知陣列資料有被更改
+                into_class.smoothScrollToPosition(ClassInfo.getCount() - 1); //滑動到最後一項(如果超出畫面)
+            }
+
+            new AlertDialog.Builder(MainActivity.this) //宣告對話框物件，並顯示課程資料
+                    .setTitle("詳細資料")
+                    .setView(class_view)
+                    .setNegativeButton("刪除", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Toast.makeText(MainActivity.this, "已刪除", Toast.LENGTH_SHORT).show();
+                            courseTableView.clearViewsIfNeeded();
+                            Course compare_c=new Course();
+                            compare_c.setserial(serial);
+                            int remove_c=0;
+                            for (int j = 0; j <list.size() ; j++) {
+                                if(list.get(j).getserial()==compare_c.getserial()){
+                                    remove_c=j;
+                                }
+                            }
+                            list.remove(remove_c);
+                            courseTableView.updateCourseViews(list);
+                        }
+                    })
+                    .setPositiveButton("離開", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    }).show();
+        }
+        catch (Exception e){
+            Log.e("dialog",e.toString());
         }
     }
 

@@ -1,9 +1,12 @@
 package net.kaijie.campus_ui;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 
-public class Course implements Serializable  {
+public class Course implements Parcelable {
 
 
 
@@ -41,6 +44,37 @@ public class Course implements Serializable  {
     }
     public Course(){
    }
+
+    protected Course(Parcel in) {
+        schedule = in.readInt();
+        day = in.readInt();
+        room = in.readString();
+        serial = in.readString();
+        name = in.readString();
+        name_eng = in.readString();
+        class_for = in.readString();
+        require = in.readString();
+        require_eng = in.readString();
+        credits = in.readString();
+        teacher = in.readString();
+        spanNum = in.readInt();
+        schedule_display = in.readString();
+        isNoClass = in.readByte() != 0;
+        forSearch = in.readByte() != 0;
+    }
+
+    public static final Creator<Course> CREATOR = new Creator<Course>() {
+        @Override
+        public Course createFromParcel(Parcel in) {
+            return new Course(in);
+        }
+
+        @Override
+        public Course[] newArray(int size) {
+            return new Course[size];
+        }
+    };
+
     public int getschedule() {
         return schedule;
     }
@@ -132,6 +166,30 @@ public class Course implements Serializable  {
 
     public void setForSearch(boolean forSearch){
         this.forSearch = forSearch;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(schedule);
+        dest.writeInt(day);
+        dest.writeString(room);
+        dest.writeString(serial);
+        dest.writeString(name);
+        dest.writeString(name_eng);
+        dest.writeString(class_for);
+        dest.writeString(require);
+        dest.writeString(require_eng);
+        dest.writeString(credits);
+        dest.writeString(teacher);
+        dest.writeInt(spanNum);
+        dest.writeString(schedule_display);
+        dest.writeByte((byte) (isNoClass ? 1 : 0));
+        dest.writeByte((byte) (forSearch ? 1 : 0));
     }
 
   /*  @Override
