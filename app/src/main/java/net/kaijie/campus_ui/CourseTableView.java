@@ -70,8 +70,8 @@ public class CourseTableView extends RelativeLayout {
             tv = new TextView(getContext());
             flp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 
-
-            tv.setText( c.getroom()+ "\n"+ c.getserial()+ "\n"+ c.getname()+ "\n" + c.getteacher()+"老師");//顯示內容
+            String display = c.getroom()+ "\n"+ c.getserial()+ "\n"+ c.getname()+ "\n" + c.getteacher()+"老師";
+            tv.setText(display);//顯示內容
 
 
             tv.setTextColor(Color.WHITE);
@@ -115,7 +115,7 @@ public class CourseTableView extends RelativeLayout {
     /**
      * 保存View 方便Remove
      */
-    private List<View> myCacheViews = new ArrayList<View>();
+    private List<View> myCacheViews = new ArrayList<>();
 
     //init  布局  日期部分
     //今天是星期幾(星期日=0 星期一=1.....星期六=6)
@@ -137,7 +137,6 @@ public class CourseTableView extends RelativeLayout {
     private String preMonth;
     /**
          * 讀取以今天為基準,周一到周日為這個月的幾號
-         * @return
         */
 
     //drawFrame 布局 畫格子大小
@@ -186,12 +185,12 @@ public class CourseTableView extends RelativeLayout {
         totalDay = ta.getInt(R.styleable.CourseTable_totalDays, 7);
         totalClasstime = ta.getInt(R.styleable.CourseTable_totalClasstime, 16);
         ta.recycle();
-        init(context);
+        init();
         //繪製整個課程布局框架
         drawFrame();
     }
-    public void setTotalClasstime(int totalClasstime) {
-        this.totalClasstime= totalClasstime;
+    public void setTotalClasstime(int totalClassTime) {
+        this.totalClasstime= totalClassTime;
         refreshCurrentLayout();
     }
     public void setTotalDay(int totalDay) {
@@ -211,7 +210,7 @@ public class CourseTableView extends RelativeLayout {
         *
         *
         */
-    private void init(Context context) {
+    private void init() {
         Calendar toDayCal = Calendar.getInstance();
         //讀取今天的日期
         toDayCal.setTimeInMillis(System.currentTimeMillis());
@@ -221,7 +220,6 @@ public class CourseTableView extends RelativeLayout {
         todayNum = toDayCal.get(Calendar.DAY_OF_WEEK)-1;
         //得到當周的日期
         datesOfMonth = getOneWeekDatesOfMonth();
-
     }
     /**
         *
@@ -430,7 +428,7 @@ public class CourseTableView extends RelativeLayout {
         TextView textView;
 
 
-        int ch=65,other=0,clock=0;
+        int ch=65,other=0;
         for (int i = 0; i < totalClasstime; i++) {
 
             textView = new TextView(getContext());
@@ -450,8 +448,8 @@ public class CourseTableView extends RelativeLayout {
                 ch=65+i-other;
             }
             char ch2 = (char) ch;
-
-            textView.setText(""+ch2);
+            String display = "" + ch2;
+            textView.setText(display);
            // textView.setText(""+(i+1));
             textView.setGravity(Gravity.CENTER);
             textView.setTextColor(Color.GRAY);
@@ -496,7 +494,7 @@ public class CourseTableView extends RelativeLayout {
      */
      private void refreshCurrentLayout() {
          removeAllViews();
-         init(getContext());
+         init();
          drawFrame();
          updateCourseViews();
      }

@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
@@ -15,6 +16,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
@@ -45,6 +47,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -110,18 +113,20 @@ public class MainActivity extends AppCompatActivity
     private static final String toilet_state = "toilet_state";
     private static final String college_state = "college_state";
     private static final String isCourseDataReady = "isCourseDataReady";
+    private static final String courseData = "CourseData";
     private static final int REQUEST_PERMISSION = 99; //設定權限是否設定成功的檢查碼
     private static Boolean isExit = false;
     private static Boolean hasTask = false;
     private HttpRequest httpRequest;
     private ProgressDialog proDialog;
+    private FloatingActionMenu menu;
     //////////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        settings = getSharedPreferences(marker_data,0);
         initData();
         initView();
 
@@ -129,7 +134,9 @@ public class MainActivity extends AppCompatActivity
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
 
         TabLayout.Tab tab = mTabLayout.getTabAt(2); //選定初步顯示的Tab
-        tab.select();
+        if (tab != null) {
+            tab.select();
+        }
 
         //rabbit
         check_permission();
@@ -138,32 +145,66 @@ public class MainActivity extends AppCompatActivity
         /////////////////////////////////
     }
 
-    @Override
-    protected void onStart() {
-        Toast.makeText(MainActivity.this,"已觸發",Toast.LENGTH_SHORT).show();
-        super.onStart();
-    }
-
     //kaijie
     public void initclass()  {
-
-        Course c1 = new Course();
-        c1.setday(5)
-                .setroom("EB109")
-                .setserial("0411")
-                .setname("英文溝通實務（一）")
-                .setname_eng("Practicum in English Communication（Ι）")
-                .setclassfor("四工程一A")
-                .setrequire("必修")
-                .setrequire_eng("Required")
-                .setcredits("0-2-1")
-                .setteacher("王于瑞")
-                .setschedule(5)
-                .setSpanNum(2);
-        list.add(c1);
+        String userCourse = settings.getString(courseData,"");
+        if(userCourse.equals("")){
+            Toast.makeText(MainActivity.this,"無使用者選課資料",Toast.LENGTH_SHORT).show();
+        }else{
+            ArrayList<Course> tempCourse = selectCourse();
+            String[] dataList = userCourse.split(",");
+            if (tempCourse != null) {
+                for (int i = 0; i < tempCourse.size(); i++) {
+                    for (int j = 0; j < dataList.length ; j+=2) {
+                        Course initUserCourse = tempCourse.get(i);
+                        if(initUserCourse.getserial().equals(dataList[j]) && initUserCourse.getclass_for().equals(dataList[j + 1])){
+                            list.add(initUserCourse);
+                            break;
+                        }
+                    }
+                }
+            }
+            courseTableView.updateCourseViews(list);
+        }
 
         courseTableView.setOnCourseItemClickListener(this);
-        courseTableView.updateCourseViews(list);
+    }
+
+    private ArrayList<Course> selectCourse() {
+        ArrayList<Course> temp = new ArrayList<>();
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(getFilesDir() + "class_database.db", null,SQLiteDatabase.OPEN_READONLY);
+        String selectCourse = "select * from tb_course";
+        try {
+            Cursor cursor = db.rawQuery(selectCourse,null);
+            cursor.moveToFirst();
+            for (int i = 0; i < cursor.getCount(); i++) {
+                Course tempCourse = new Course();
+                tempCourse.setname(cursor.getString(1))
+                        .setname_eng(cursor.getString(2))
+                        .setserial(cursor.getString(3))
+                        .setroom(cursor.getString(4))
+                        .setclassfor(cursor.getString(5))
+                        .setschedule(cursor.getInt(6))
+                        .setSpanNum(cursor.getInt(7))
+                        .setteacher(cursor.getString(8))
+                        .setrequire(cursor.getString(9))
+                        .setrequire_eng(cursor.getString(10))
+                        .setcredits(cursor.getString(11))
+                        .setday(cursor.getInt(12))
+                        .setschedule_display(cursor.getString(13));
+                temp.add(tempCourse);
+                cursor.moveToNext();
+            }
+            cursor.close();
+            Log.d("SQLite","course data is ready");
+        }
+        catch (SQLiteException e)
+        {
+            Log.d("SQLite",e.getMessage());
+            return null;
+        }
+        db.close();
+        return temp;
     }
 
     private void initData() {
@@ -198,9 +239,12 @@ public class MainActivity extends AppCompatActivity
         int id = view.getId();
         switch (id){
             case R.id.menu_item:
-                Toast.makeText(MainActivity.this,"新增課程",Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(this,AddCourseActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("list", (ArrayList<? extends Parcelable>) list);
+                intent.putExtra("userCourse",bundle);
                 startActivityForResult(intent,1);
+                menu.close(true);
                 break;
         }
     }
@@ -212,6 +256,14 @@ public class MainActivity extends AppCompatActivity
             if(resultCode == RESULT_OK) {
                 Bundle resultBundle = data.getBundleExtra("addCourse");
                 List<Course> temp = resultBundle.getParcelableArrayList("list");
+                for (int i = 0; i < temp.size(); i++) {
+                    list.add(temp.get(i));
+                }
+                courseTableView.updateCourseViews(list);
+            }
+            else if(resultCode == RESULT_CANCELED)
+            {
+                Toast.makeText(MainActivity.this,"新增失敗",Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -299,6 +351,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void destroyItem(ViewGroup container, int position, Object object){
             container.removeView((View) object);
+            menu.close(true);
         }
     }
 
@@ -322,6 +375,7 @@ public class MainActivity extends AppCompatActivity
             View view = LayoutInflater.from(context).inflate(R.layout.tab_2, null);
             addView(view);
             courseTableView = (CourseTableView) view.findViewById(R.id.ctv);
+            menu = (FloatingActionMenu) view.findViewById(R.id.menu);
             FloatingActionButton floatingActionButton = (FloatingActionButton)view.findViewById(R.id.menu_item);
             floatingActionButton.setOnClickListener(MainActivity.this);
             initclass();
@@ -442,6 +496,7 @@ public class MainActivity extends AppCompatActivity
                     timerExit.schedule(task, 2000);
                 }
             } else {
+                storeCourse();
                 finish(); // 離開程式
                 System.exit(0);
             }
@@ -449,12 +504,29 @@ public class MainActivity extends AppCompatActivity
         //}
         return false;
     }
+
+    @Override
+    protected void onStop() {
+        storeCourse();
+        super.onStop();
+    }
+
+    public void storeCourse(){
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < list.size(); i++) {
+            String serial = list.get(i).getserial();
+            String classfor = list.get(i).getclass_for();
+            if(serial != null || classfor != null)
+                sb.append(serial).append(",").append(classfor).append(",");
+        }
+        settings.edit().putString(courseData,sb.toString()).apply();
+    }
+
     public void rabbit() {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        settings = getSharedPreferences(marker_data,0);
         settings.edit()
                 .putBoolean(bicycle_state, true)
                 .putBoolean(montor_state, true)
@@ -537,6 +609,9 @@ public class MainActivity extends AppCompatActivity
                 int spanNum = array.getJSONObject(i).optInt("class_span");
                 String require = array.getJSONObject(i).optString("require");
                 String classfor = array.getJSONObject(i).optString("class");
+                String name_eng = array.getJSONObject(i).optString("name_eng");
+                String credits = array.getJSONObject(i).optString("credits");
+                String require_eng = array.getJSONObject(i).optString("require_eng");
                 Course course = new Course();
                 course.setserial(serial)
                         .setname(name)
@@ -547,7 +622,10 @@ public class MainActivity extends AppCompatActivity
                         .setrequire(require)
                         .setSpanNum(spanNum)
                         .setschedule_display(schedule)
-                        .setclassfor(classfor);
+                        .setclassfor(classfor)
+                        .setname_eng(name_eng)
+                        .setcredits(credits)
+                        .setrequire_eng(require_eng);
                 courseArray.add(course);
             }
             Log.d("Course","OK");

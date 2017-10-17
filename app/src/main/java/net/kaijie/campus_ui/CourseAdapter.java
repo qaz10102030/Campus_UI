@@ -17,7 +17,7 @@ import java.util.List;
  * Created by User on 2017/10/6.
  */
 public class CourseAdapter extends ArrayAdapter<Course> {
-    private List<Course> courseList = new ArrayList<>();
+    public List<Course> courseList = new ArrayList<>();
     private CourseFilter courseFilter;
 
     public CourseAdapter(Context context, int resource) {
