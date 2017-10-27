@@ -114,9 +114,11 @@ public class AddCourseActivity extends AppCompatActivity implements
     private boolean checkCourseCollision(Course targetCourse){
         int targetDay = targetCourse.getday();
         int targetSchedule = targetCourse.getschedule();
+        /*
         for (int i = 0; i < userCourse.size(); i++) {
             if(userCourse.get(i).getday() == targetDay && userCourse.get(i).getschedule() == )
-        }
+        }*/
+        return true;
     }
 
     @Override

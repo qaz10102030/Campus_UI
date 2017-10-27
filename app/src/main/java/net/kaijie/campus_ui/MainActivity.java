@@ -11,7 +11,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,17 +18,17 @@ import android.os.Handler;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.multidex.MultiDex;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -43,6 +42,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,7 +74,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static android.Manifest.permission.MANAGE_DOCUMENTS;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
@@ -103,7 +102,7 @@ public class MainActivity extends AppCompatActivity
     private static final String yuntech_json  = "[{\"college\":\"工程學院\",\"department\":[{\"name\":\"工程一館\",\"code\":\"EM\"},{\"name\":\"工程二館\",\"code\":\"EL\"},{\"name\":\"工程三館\",\"code\":\"ES\"},{\"name\":\"工程四館\",\"code\":\"EC\"},{\"name\":\"工程五館\",\"code\":\"EB\",\"floor\":[{\"floor_num\":\"1F\",\"classroom\":[{\"type\":\"電腦教室\",\"number\":\"EB102\"},{\"type\":\"一般教室\",\"number\":\"EB109\"},{\"type\":\"一般教室\",\"number\":\"EB110\"}]},{\"floor_num\":\"2F\",\"classroom\":[{\"type\":\"實驗室\",\"number\":\"EB201\"},{\"type\":\"一般教室\",\"number\":\"EB202\"}]}]},{\"name\":\"工程六館\",\"code\":\"EN\"}]}]";
     private HashMap<String, HashMap<String, List<LatLng>>> buildkind=null;
     private ArrayList<Marker> mMarkers = new ArrayList<>();
-    private ArrayAdapter adFloor;
+    private ArrayAdapter<String> adFloor;
     public ImageButton bt_navigation;
     private SharedPreferences settings;
     private static final String marker_data = "DATA";
@@ -208,7 +207,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initData() {
-        mTabLayout = (android.support.design.widget.TabLayout)findViewById(R.id.tabs);
+        mTabLayout = (TabLayout)findViewById(R.id.tabs);
         mTabLayout.addTab(mTabLayout.newTab().setText("個人").setIcon(R.drawable.ic_person));
         mTabLayout.addTab(mTabLayout.newTab().setText("課程").setIcon(R.drawable.ic_class));
         mTabLayout.addTab(mTabLayout.newTab().setText("地圖").setIcon(R.drawable.ic_yuntech));
@@ -275,7 +274,7 @@ public class MainActivity extends AppCompatActivity
             LayoutInflater inflater = LayoutInflater.from(MainActivity.this); //LayoutInflater的目的是將自己設計xml的Layout轉成View
             View class_view = inflater.inflate(R.layout.class_msg, null); //指定要給View表述的Layout
             ListView into_class = (ListView) class_view.findViewById(R.id.into_class); //定義顯示課程資訊的清單物件
-            ArrayAdapter ClassInfo = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1);//設定課程資訊的清單物件要顯示資料的陣列
+            ArrayAdapter<String> ClassInfo = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1);//設定課程資訊的清單物件要顯示資料的陣列
             into_class.setAdapter(ClassInfo); //定義顯示課程資訊的清單物件
 
             String course_plan="True";
@@ -355,6 +354,38 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    class SamplePagerAdapter2 extends PagerAdapter{
+        private ArrayList<PageView> personal;
+        public SamplePagerAdapter2(ArrayList<PageView> personalPage) {
+            personal = personalPage;
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+
+        @Override
+        public boolean isViewFromObject(View view, Object o) {
+            return o == view;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return "Item " + (position + 1);
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            container.addView(personal.get(position));
+            return personal.get(position);
+        }
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            container.removeView((View) object);
+        }
+    }
+
     public class PageView extends RelativeLayout {
         public PageView(Context context) {
             super(context);
@@ -364,8 +395,15 @@ public class MainActivity extends AppCompatActivity
         public PageOneView(Context context) {
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.tab_1, null);
-            TextView textView = (TextView) view.findViewById(R.id.item_test1);
-            textView.setText("Page one");
+            TabLayout mTabs = (TabLayout) view.findViewById(R.id.tabs2);
+            mTabs.addTab(mTabs.newTab().setText("我的筆記"));
+            mTabs.addTab(mTabs.newTab().setText("共同筆記"));
+            ViewPager mViewPager2 = (ViewPager) view.findViewById(R.id.viewpager2);
+            ArrayList<PageView> personalPage = new ArrayList<>();
+            personalPage.add(new PersonalOneView(MainActivity.this));
+            personalPage.add(new PersonalTwoView(MainActivity.this));
+            mViewPager2.setAdapter(new SamplePagerAdapter2(personalPage));
+            mViewPager2.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabs));
             addView(view);
         }
     }
@@ -407,8 +445,27 @@ public class MainActivity extends AppCompatActivity
         public PageFourView(Context context) {
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.tab_4, null);
-            TextView textView = (TextView) view.findViewById(R.id.item_test4);
-            textView.setText("Page four");
+            LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    LayoutParams.MATCH_PARENT);
+            view.setLayoutParams(param);
+            Spinner spinner1 = (Spinner) view.findViewById(R.id.spinner);
+            ArrayAdapter<String> sp1 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, new String[]{"室外場地", "體育場"});
+            spinner1.setAdapter(sp1);
+            Spinner spinner2 = (Spinner) view.findViewById(R.id.spinner2);
+            ArrayAdapter<String> sp2 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, new String[]{"田徑場", "排球場","籃球場"});
+            spinner2.setAdapter(sp2);
+            ListView lvCourt = (ListView)view.findViewById(R.id.lvCourt);
+            View headerView = getLayoutInflater().inflate(R.layout.listview_header2, lvCourt, false);
+            lvCourt.addHeaderView(headerView);
+            ArrayList<String> fakecourt = new ArrayList<>();
+            fakecourt.add("10/16  (一)\n\t田徑隊 徑雲盃 1700-2000\n\t足球隊 1800-2130");
+            fakecourt.add("10/17  (二)\n\t田徑隊 徑雲盃 1700-2000");
+            fakecourt.add("10/18  (三)\n\t田徑隊 徑雲盃 1700-2000");
+            fakecourt.add("10/19  (四)\n\t田徑隊 徑雲盃 1700-2000\n\t足球隊 1800-2130");
+            fakecourt.add("10/20  (五)\n\t田徑隊 徑雲盃 1700-2000");
+            ArrayAdapter<String> court = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, fakecourt);
+            lvCourt.setAdapter(court);
             addView(view);
         }
     }
@@ -416,8 +473,69 @@ public class MainActivity extends AppCompatActivity
         public PageFiveView(Context context) {
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.tab_5, null);
-            TextView textView = (TextView) view.findViewById(R.id.item_test5);
-            textView.setText("Page five");
+            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.reyview);
+            LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this,LinearLayoutManager.HORIZONTAL,false);
+            recyclerView.setLayoutManager(layoutManager);
+            List<String> list = new ArrayList<>();
+            list.add("校園版");
+            list.add("有趣版");
+            list.add("運動版");
+            list.add("課程版");
+            list.add("寵物版");
+            list.add("男孩版");
+            list.add("女孩版");
+            list.add("廢文版");
+            list.add("升學版");
+            list.add("3C版");
+            list.add("社團版");
+            TopicChatAdapter topicChatAdapter = new TopicChatAdapter(list,MainActivity.this);
+            recyclerView.setAdapter(topicChatAdapter);
+            List<String> courseList = new ArrayList<>();
+            courseList.add("1314 排隊理論");
+            courseList.add("0304 體育");
+            courseList.add("2131 計算機網路");
+            courseList.add("2130 微算機原理及應用");
+            courseList.add("2129 資料結構");
+            courseList.add("0459 英文創作與發表");
+            ListView lv_course_chat = (ListView) view.findViewById(R.id.lv_course_chat);
+            View headerView = getLayoutInflater().inflate(R.layout.listview_header, lv_course_chat, false);
+            lv_course_chat.addHeaderView(headerView);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, courseList);
+            lv_course_chat.setAdapter(adapter);
+            addView(view);
+        }
+    }
+    public class PersonalOneView extends PageView{
+        public PersonalOneView(Context context) {
+            super(context);
+            View view = LayoutInflater.from(context).inflate(R.layout.personal1, null);
+            List<String> p1List = new ArrayList<>();
+            p1List.add("1314 排隊理論");
+            p1List.add("0304 體育");
+            p1List.add("2131 計算機網路");
+            p1List.add("2130 微算機原理及應用");
+            p1List.add("2129 資料結構");
+            p1List.add("0459 英文創作與發表");
+            ListView person1 = (ListView)view.findViewById(R.id.lvPerson1);
+            ArrayAdapter p1 = new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,p1List);
+            person1.setAdapter(p1);
+            addView(view);
+        }
+    }
+    public class PersonalTwoView extends PageView{
+        public PersonalTwoView(Context context) {
+            super(context);
+            View view = LayoutInflater.from(context).inflate(R.layout.personal2, null);
+            List<String> p2List = new ArrayList<>();
+            p2List.add("1314 排隊理論");
+            p2List.add("0304 體育");
+            p2List.add("2131 計算機網路");
+            p2List.add("2130 微算機原理及應用");
+            p2List.add("2129 資料結構");
+            p2List.add("0459 英文創作與發表");
+            ListView person2 = (ListView)view.findViewById(R.id.lvPerson2);
+            ArrayAdapter p2 = new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,p2List);
+            person2.setAdapter(p2);
             addView(view);
         }
     }
@@ -428,7 +546,7 @@ public class MainActivity extends AppCompatActivity
         mMap = googleMap;
         LatLng yuntech = new LatLng(23.6951701,120.5337975);
         addArea();
-        init_marker();
+        //init_marker();
         singleMarker = null;
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -816,7 +934,7 @@ public class MainActivity extends AppCompatActivity
             String floorinfo = marker.getSnippet();
             if( floorinfo != null) {
                 ListView lvSnippet = ((ListView) infoWindow.findViewById(R.id.lvFloor));
-                adFloor = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1);
+                adFloor = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1);
                 lvSnippet.setAdapter(adFloor);
                 parsefloor(floorinfo);
             }

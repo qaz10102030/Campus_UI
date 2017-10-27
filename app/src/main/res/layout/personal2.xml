@@ -3,16 +3,9 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/reyview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
-
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/lv_course_chat" />
-
-
+        android:id="@+id/lvPerson2"
+        android:layout_gravity="center_horizontal" />
 </LinearLayout>
