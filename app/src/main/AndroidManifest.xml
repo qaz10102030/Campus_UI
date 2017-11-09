@@ -26,8 +26,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AddCourseActivity">
+        <activity
+            android:name=".AddCourseActivity">
         </activity>
+        <activity
+            android:name=".NoteList">
+        </activity>
+        <activity
+            android:name=".SharedNote">
+        </activity>
+        <activity
+            android:name=".AddNoteActivity">
+        </activity>
+
     </application>
 
 </manifest>

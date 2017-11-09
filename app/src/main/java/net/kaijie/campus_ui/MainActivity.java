@@ -37,6 +37,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity
         GoogleMap.OnMapClickListener,
         View.OnClickListener,
         CourseTableView.OnCourseItemClickListener
+
         ////////////
 {
     //kaijie
@@ -149,24 +151,21 @@ public class MainActivity extends AppCompatActivity
         String userCourse = settings.getString(courseData,"");
         if(userCourse.equals("")){
             Toast.makeText(MainActivity.this,"無使用者選課資料",Toast.LENGTH_SHORT).show();
-        }else{
+        }else {
             ArrayList<Course> tempCourse = selectCourse();
             String[] dataList = userCourse.split(",");
             if (tempCourse != null) {
                 for (int i = 0; i < tempCourse.size(); i++) {
-                    for (int j = 0; j < dataList.length ; j+=2) {
+                    for (int j = 0; j < dataList.length; j += 2) {
                         Course initUserCourse = tempCourse.get(i);
-                        if(initUserCourse.getserial().equals(dataList[j]) && initUserCourse.getclass_for().equals(dataList[j + 1])){
+                        if (initUserCourse.getserial().equals(dataList[j]) && initUserCourse.getclass_for().equals(dataList[j + 1])) {
                             list.add(initUserCourse);
                             break;
                         }
                     }
                 }
             }
-            courseTableView.updateCourseViews(list);
         }
-
-        courseTableView.setOnCourseItemClickListener(this);
     }
 
     private ArrayList<Course> selectCourse() {
@@ -328,6 +327,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+
     class SamplePagerAdapter extends PagerAdapter{
         @Override
         public int getCount(){
@@ -400,11 +400,14 @@ public class MainActivity extends AppCompatActivity
             mTabs.addTab(mTabs.newTab().setText("共同筆記"));
             ViewPager mViewPager2 = (ViewPager) view.findViewById(R.id.viewpager2);
             ArrayList<PageView> personalPage = new ArrayList<>();
+            initclass();
             personalPage.add(new PersonalOneView(MainActivity.this));
             personalPage.add(new PersonalTwoView(MainActivity.this));
             mViewPager2.setAdapter(new SamplePagerAdapter2(personalPage));
             mViewPager2.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabs));
+            mTabs.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager2));
             addView(view);
+
         }
     }
     public class PageTwoView extends PageView{
@@ -413,10 +416,14 @@ public class MainActivity extends AppCompatActivity
             View view = LayoutInflater.from(context).inflate(R.layout.tab_2, null);
             addView(view);
             courseTableView = (CourseTableView) view.findViewById(R.id.ctv);
+            courseTableView.updateCourseViews(list);
+            courseTableView.setOnCourseItemClickListener(MainActivity.this);
+
+
             menu = (FloatingActionMenu) view.findViewById(R.id.menu);
             FloatingActionButton floatingActionButton = (FloatingActionButton)view.findViewById(R.id.menu_item);
             floatingActionButton.setOnClickListener(MainActivity.this);
-            initclass();
+
 
         }
     }
@@ -510,14 +517,27 @@ public class MainActivity extends AppCompatActivity
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.personal1, null);
             List<String> p1List = new ArrayList<>();
-            p1List.add("1314 排隊理論");
-            p1List.add("0304 體育");
-            p1List.add("2131 計算機網路");
-            p1List.add("2130 微算機原理及應用");
-            p1List.add("2129 資料結構");
-            p1List.add("0459 英文創作與發表");
+
+            for (int i = 0; i < list.size(); i++) {
+                String serial = list.get(i).getserial();
+                String name = list.get(i).getname();
+                String teather = list.get(i).getteacher();
+
+                p1List.add(serial+" "+name);
+            }
+
             ListView person1 = (ListView)view.findViewById(R.id.lvPerson1);
+
             ArrayAdapter p1 = new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,p1List);
+
+            person1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+list.get(position).getserial()+list.get(position).getname(),Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(MainActivity.this,NoteList.class);
+                    startActivity(intent);
+                }
+            });
             person1.setAdapter(p1);
             addView(view);
         }
@@ -527,14 +547,25 @@ public class MainActivity extends AppCompatActivity
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.personal2, null);
             List<String> p2List = new ArrayList<>();
-            p2List.add("1314 排隊理論");
-            p2List.add("0304 體育");
-            p2List.add("2131 計算機網路");
-            p2List.add("2130 微算機原理及應用");
-            p2List.add("2129 資料結構");
-            p2List.add("0459 英文創作與發表");
+            for (int i = 0; i < list.size(); i++) {
+                String serial = list.get(i).getserial();
+                String name = list.get(i).getname();
+                String teather = list.get(i).getteacher();
+                p2List.add(serial+" "+name);
+            }
+
             ListView person2 = (ListView)view.findViewById(R.id.lvPerson2);
             ArrayAdapter p2 = new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,p2List);
+
+            person2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+list.get(position).getserial()+list.get(position).getname(),Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(MainActivity.this,SharedNote.class);
+                    startActivity(intent);
+                }
+            });
+
             person2.setAdapter(p2);
             addView(view);
         }

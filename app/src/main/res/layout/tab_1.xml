@@ -9,12 +9,12 @@
         android:layout_height="wrap_content">
 
         <ImageView
+            android:id="@+id/imageview8"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:layout_gravity="center_horizontal"
             android:scaleType="fitXY"
-            android:id="@+id/imageView9"
-            android:src="@mipmap/fake_sticker"
-            android:layout_gravity="center_horizontal" />
+            android:src="@mipmap/fake_sticker" />
 
         <TextView
             android:layout_width="wrap_content"
