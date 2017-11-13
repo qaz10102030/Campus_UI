@@ -534,7 +534,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+list.get(position).getserial()+list.get(position).getname(),Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(MainActivity.this,NoteList.class);
+                    Intent intent = new Intent(MainActivity.this,PersonalNoteList.class);
                     startActivity(intent);
                 }
             });
@@ -561,7 +561,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+list.get(position).getserial()+list.get(position).getname(),Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(MainActivity.this,SharedNote.class);
+                    Intent intent = new Intent(MainActivity.this,SharedNotelist.class);
                     startActivity(intent);
                 }
             });

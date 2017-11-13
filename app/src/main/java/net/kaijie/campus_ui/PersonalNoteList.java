@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,7 +25,7 @@ import java.util.Map;
  * Created by pc on 2017/11/3.
  */
 
-public class NoteList extends AppCompatActivity implements
+public class PersonalNoteList extends AppCompatActivity implements
         AdapterView.OnItemClickListener,
         AdapterView.OnItemLongClickListener {
 
@@ -41,7 +42,7 @@ public class NoteList extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.edit_note);
+        setContentView(R.layout.personal_notelist);
         InitView();
 
 
@@ -60,7 +61,6 @@ public class NoteList extends AppCompatActivity implements
         dataList = new ArrayList<Map<String, Object>>();
         DbHelper = new NoteDateBaseHelper(this);
         DB = DbHelper.getReadableDatabase();
-
         note_list.setOnItemClickListener(this);
         note_list.setOnItemLongClickListener(this);
 
@@ -115,9 +115,11 @@ public class NoteList extends AppCompatActivity implements
             dataList.add(map);
 
         }
+
         simple_adapter = new SimpleAdapter(this, dataList, R.layout.notelist_item,
                 new String[]{"tv_title","tv_content", "tv_date"}, new int[]{
                 R.id.tv_title,R.id.tv_content, R.id.tv_date});
+
         note_list.setAdapter(simple_adapter);
     }
 
@@ -128,7 +130,7 @@ public class NoteList extends AppCompatActivity implements
         String title1 = content.split("[{},=]")[6];
 
 
-        Intent myIntent = new Intent(NoteList.this, AddNoteActivity.class);
+        Intent myIntent = new Intent(PersonalNoteList.this, AddNoteActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("title",title1 );
         bundle.putString("info", content1);

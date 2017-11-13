@@ -58,6 +58,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         et_title.setText(last_title);
         btn_cancel.setOnClickListener(this);
         btn_save.setOnClickListener(this);
+        et_title.addTextChangedListener(new MagicTextLengthWatcher(20));
     }
 
 
@@ -92,7 +93,6 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                     ContentValues values = new ContentValues();
                     values.put("content", content);
                     values.put("title", title);
-
                     db.update("note", values, "content =? and title = ?", new String[]{last_content,last_title});
                     finish();
                 }
