@@ -33,4 +33,7 @@ dependencies {
     compile group: 'com.mcxiaoke.volley', name: 'library', version: '1.0.19'
     compile 'com.android.support:multidex:1.0.1'
     compile'com.android.support:recyclerview-v7:25.1.0'
+    compile('io.socket:socket.io-client:0.7.0') {
+        exclude group: 'org.json', module: 'json'
+    }
 }

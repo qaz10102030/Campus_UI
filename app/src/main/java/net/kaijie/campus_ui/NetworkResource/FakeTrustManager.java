@@ -1,4 +1,4 @@
-package net.kaijie.campus_ui.HttpRequest;
+package net.kaijie.campus_ui.NetworkResource;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;

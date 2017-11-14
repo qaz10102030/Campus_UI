@@ -23,7 +23,6 @@ public class WelcomeActivity extends AppCompatActivity {
     private static final int GOTO_MAIN_ACTIVITY = 0;
     private Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
-
             switch (msg.what) {
                 case GOTO_MAIN_ACTIVITY:
                     Intent intent = new Intent();
@@ -32,7 +31,6 @@ public class WelcomeActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                     break;
-
                 default:
                     break;
             }

@@ -32,8 +32,7 @@ public class TopicChatAdapter extends RecyclerView.Adapter<TopicChatAdapter.View
 
     @Override
     public TopicChatAdapter.Viewholder onCreateViewHolder(ViewGroup parent, int viewType) {
-        final Viewholder holder = new Viewholder(LayoutInflater.from(context).inflate(R.layout.recycler_item,parent,false));
-        return holder;
+        return new Viewholder(LayoutInflater.from(context).inflate(R.layout.recycler_item,parent,false));
     }
 
     @Override

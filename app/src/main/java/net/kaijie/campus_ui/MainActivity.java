@@ -61,7 +61,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
 
-import net.kaijie.campus_ui.HttpRequest.HttpRequest;
+import net.kaijie.campus_ui.NetworkResource.HttpRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -71,6 +71,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -254,10 +255,12 @@ public class MainActivity extends AppCompatActivity
             if(resultCode == RESULT_OK) {
                 Bundle resultBundle = data.getBundleExtra("addCourse");
                 List<Course> temp = resultBundle.getParcelableArrayList("list");
-                for (int i = 0; i < temp.size(); i++) {
-                    list.add(temp.get(i));
+                if (temp != null) {
+                    for (int i = 0; i < temp.size(); i++) {
+                        list.add(temp.get(i));
+                    }
+                    courseTableView.updateCourseViews(list);
                 }
-                courseTableView.updateCourseViews(list);
             }
             else if(resultCode == RESULT_CANCELED)
             {
@@ -273,7 +276,7 @@ public class MainActivity extends AppCompatActivity
             LayoutInflater inflater = LayoutInflater.from(MainActivity.this); //LayoutInflater的目的是將自己設計xml的Layout轉成View
             View class_view = inflater.inflate(R.layout.class_msg, null); //指定要給View表述的Layout
             ListView into_class = (ListView) class_view.findViewById(R.id.into_class); //定義顯示課程資訊的清單物件
-            ArrayAdapter<String> ClassInfo = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1);//設定課程資訊的清單物件要顯示資料的陣列
+            ArrayAdapter<String> ClassInfo = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1);//設定課程資訊的清單物件要顯示資料的陣列
             into_class.setAdapter(ClassInfo); //定義顯示課程資訊的清單物件
 
             String course_plan="True";
@@ -308,7 +311,7 @@ public class MainActivity extends AppCompatActivity
                             compare_c.setserial(serial);
                             int remove_c=0;
                             for (int j = 0; j <list.size() ; j++) {
-                                if(list.get(j).getserial()==compare_c.getserial()){
+                                if(Objects.equals(list.get(j).getserial(), compare_c.getserial())){
                                     remove_c=j;
                                 }
                             }
