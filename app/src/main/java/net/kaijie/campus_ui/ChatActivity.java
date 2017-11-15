@@ -1,7 +1,6 @@
 package net.kaijie.campus_ui;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -24,20 +23,21 @@ import org.json.JSONObject;
  * Created by User on 2017/11/15.
  */
 public class ChatActivity extends AppCompatActivity{
-    public ChatSocket httpSocket;
+    public ChatSocket chatSocket;
     private ChatAdapter chatAdapter;
     private EditText chatText;
     public String username;
-    public int roomID;
+    public String roomID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_layout);
         username = getIntent().getExtras().getString("username");
-        roomID = getIntent().getExtras().getInt("roomID");
-        httpSocket.setSocketCallback(socketCallback);
-        Log.d("Chat",httpSocket.isConnected + "");
+        roomID = getIntent().getExtras().getString("roomID");
+        chatSocket = MainActivity.mainActivity.chatSocket;
+        chatSocket.setSocketCallback(socketCallback);
+        Log.d("Chat", chatSocket.isConnected + "");
         initView();
         chatAdapter.add(new ChatMessage(0, username + "已進入房間", username));
 
@@ -46,10 +46,9 @@ public class ChatActivity extends AppCompatActivity{
         getSupportActionBar().setDisplayShowHomeEnabled(false);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayShowCustomEnabled(true);
-        View actionbarLayout = LayoutInflater.from(this).inflate(
-                R.layout.actionbar_layout, null);
-        TextView actionbar_room_num = actionbarLayout.findViewById(R.id.actionbar_room_num);
-        String forActionbar = roomID + "號房間";
+        View actionbarLayout = LayoutInflater.from(this).inflate(R.layout.chat_actionbar, null);
+        TextView actionbar_room_num = (TextView) actionbarLayout.findViewById(R.id.actionbar_room_num);
+        String forActionbar = roomID + " 房間";
         actionbar_room_num.setText(forActionbar);
         getSupportActionBar().setCustomView(actionbarLayout);
         ImageButton imageButton = (ImageButton)findViewById(R.id.actionbar_room_num_bt);
@@ -119,8 +118,15 @@ public class ChatActivity extends AppCompatActivity{
     private boolean sendChatMessage() {
         String msg = chatText.getText().toString().trim();
         chatAdapter.add(new ChatMessage(2, msg, username));
-        httpSocket.emit(ChatSocket.Chat_Msg, msg);
+        chatSocket.emit(ChatSocket.Chat_Msg, msg);
         chatText.setText("");
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        chatSocket.setSocketCallback(MainActivity.mainActivity.socketCallback);
+        chatSocket.disconnect();
     }
 }

@@ -53,7 +53,7 @@ public class ChatSocket {
                     public void call(Object... args) {
                         @SuppressWarnings("unchecked")
                         Map<String, List<String>> headers = (Map<String, List<String>>) args[0];
-                        headers.put("referer", Collections.singletonList(Server + "/socket/yuntech_" + roomID));
+                        headers.put("referer", Collections.singletonList(Server + "socket/" + roomID));
                         headers.put("deviceUID", Collections.singletonList(Build.SERIAL));
                     }
                 }).on(Transport.EVENT_RESPONSE_HEADERS, new Emitter.Listener() {
@@ -151,7 +151,7 @@ public class ChatSocket {
             if (!isConnected) {
                 isConnected = true;
             }
-            Log.d( "Server_Socket", "連線成功");
+            Log.d( "Server_Socket", "連線成功 " + roomID);
         }
     };
 

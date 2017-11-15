@@ -61,6 +61,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
 
+import net.kaijie.campus_ui.NetworkResource.ChatSocket;
 import net.kaijie.campus_ui.NetworkResource.HttpRequest;
 
 import org.json.JSONArray;
@@ -120,6 +121,8 @@ public class MainActivity extends AppCompatActivity
     private static Boolean isExit = false;
     private static Boolean hasTask = false;
     private HttpRequest httpRequest;
+    public ChatSocket chatSocket;
+    public static MainActivity mainActivity;
     private ProgressDialog proDialog;
     private FloatingActionMenu menu;
     //////////////////////
@@ -128,6 +131,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mainActivity = this;
         settings = getSharedPreferences(marker_data,0);
         initData();
         initView();
@@ -689,6 +693,7 @@ public class MainActivity extends AppCompatActivity
 
         //建立Request物件
         httpRequest = new HttpRequest(MainActivity.this);
+        chatSocket = new ChatSocket(socketCallback);
         boolean courseReady = settings.getBoolean(isCourseDataReady,false);
         if(!checkCourseData() || !courseReady){
             downloadCourse();
@@ -1097,6 +1102,17 @@ public class MainActivity extends AppCompatActivity
             proDialog.dismiss();
             Toast.makeText(MainActivity.this,"伺服器出錯啦><",Toast.LENGTH_SHORT).show();
             Log.d("Volley",error);
+        }
+    };
+    public ChatSocket.SocketCallback socketCallback = new ChatSocket.SocketCallback() {
+        @Override
+        public void onReceived(String result) {
+            Log.d("Socket_Activity",result);
+        }
+
+        @Override
+        public void onError(Exception err) {
+            Log.d("Socket_Err_Activity",err.getMessage());
         }
     };
     @Override
