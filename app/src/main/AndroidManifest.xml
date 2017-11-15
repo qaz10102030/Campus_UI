@@ -43,7 +43,9 @@
         <activity
             android:name=".AddNoteActivity">
         </activity>
-
+        <activity
+            android:name=".ChatActivity">
+        </activity>
     </application>
 
 </manifest>

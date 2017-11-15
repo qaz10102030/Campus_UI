@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity
     private ViewPager mViewPager;
     private ArrayList<PageView> pageList;
     private CourseTableView courseTableView;
-    private List<Course> list = new ArrayList<>();
+    private List<Course> userCourseList = new ArrayList<>();
     ///////////
     //rabbit
     private GoogleMap mMap;
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity
                     for (int j = 0; j < dataList.length; j += 2) {
                         Course initUserCourse = tempCourse.get(i);
                         if (initUserCourse.getserial().equals(dataList[j]) && initUserCourse.getclass_for().equals(dataList[j + 1])) {
-                            list.add(initUserCourse);
+                            userCourseList.add(initUserCourse);
                             break;
                         }
                     }
@@ -240,7 +240,7 @@ public class MainActivity extends AppCompatActivity
             case R.id.menu_item:
                 Intent intent = new Intent(this,AddCourseActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putParcelableArrayList("list", (ArrayList<? extends Parcelable>) list);
+                bundle.putParcelableArrayList("userCourseList", (ArrayList<? extends Parcelable>) userCourseList);
                 intent.putExtra("userCourse",bundle);
                 startActivityForResult(intent,1);
                 menu.close(true);
@@ -254,12 +254,12 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == 1) {
             if(resultCode == RESULT_OK) {
                 Bundle resultBundle = data.getBundleExtra("addCourse");
-                List<Course> temp = resultBundle.getParcelableArrayList("list");
+                List<Course> temp = resultBundle.getParcelableArrayList("userCourseList");
                 if (temp != null) {
                     for (int i = 0; i < temp.size(); i++) {
-                        list.add(temp.get(i));
+                        userCourseList.add(temp.get(i));
                     }
-                    courseTableView.updateCourseViews(list);
+                    courseTableView.updateCourseViews(userCourseList);
                 }
             }
             else if(resultCode == RESULT_CANCELED)
@@ -310,13 +310,13 @@ public class MainActivity extends AppCompatActivity
                             Course compare_c=new Course();
                             compare_c.setserial(serial);
                             int remove_c=0;
-                            for (int j = 0; j <list.size() ; j++) {
-                                if(Objects.equals(list.get(j).getserial(), compare_c.getserial())){
+                            for (int j = 0; j < userCourseList.size() ; j++) {
+                                if(userCourseList.get(j).getserial() == compare_c.getserial()){
                                     remove_c=j;
                                 }
                             }
-                            list.remove(remove_c);
-                            courseTableView.updateCourseViews(list);
+                            userCourseList.remove(remove_c);
+                            courseTableView.updateCourseViews(userCourseList);
                         }
                     })
                     .setPositiveButton("離開", new DialogInterface.OnClickListener() {
@@ -419,7 +419,7 @@ public class MainActivity extends AppCompatActivity
             View view = LayoutInflater.from(context).inflate(R.layout.tab_2, null);
             addView(view);
             courseTableView = (CourseTableView) view.findViewById(R.id.ctv);
-            courseTableView.updateCourseViews(list);
+            courseTableView.updateCourseViews(userCourseList);
             courseTableView.setOnCourseItemClickListener(MainActivity.this);
 
 
@@ -501,12 +501,9 @@ public class MainActivity extends AppCompatActivity
             TopicChatAdapter topicChatAdapter = new TopicChatAdapter(list,MainActivity.this);
             recyclerView.setAdapter(topicChatAdapter);
             List<String> courseList = new ArrayList<>();
-            courseList.add("1314 排隊理論");
-            courseList.add("0304 體育");
-            courseList.add("2131 計算機網路");
-            courseList.add("2130 微算機原理及應用");
-            courseList.add("2129 資料結構");
-            courseList.add("0459 英文創作與發表");
+            for (int i = 0; i < userCourseList.size(); i++) {
+                courseList.add(userCourseList.get(i).getname());
+            }
             ListView lv_course_chat = (ListView) view.findViewById(R.id.lv_course_chat);
             View headerView = getLayoutInflater().inflate(R.layout.listview_header, lv_course_chat, false);
             lv_course_chat.addHeaderView(headerView);
@@ -521,10 +518,10 @@ public class MainActivity extends AppCompatActivity
             View view = LayoutInflater.from(context).inflate(R.layout.personal1, null);
             List<String> p1List = new ArrayList<>();
 
-            for (int i = 0; i < list.size(); i++) {
-                String serial = list.get(i).getserial();
-                String name = list.get(i).getname();
-                String teather = list.get(i).getteacher();
+            for (int i = 0; i < userCourseList.size(); i++) {
+                String serial = userCourseList.get(i).getserial();
+                String name = userCourseList.get(i).getname();
+                String teather = userCourseList.get(i).getteacher();
 
                 p1List.add(serial+" "+name);
             }
@@ -536,7 +533,7 @@ public class MainActivity extends AppCompatActivity
             person1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+list.get(position).getserial()+list.get(position).getname(),Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+ userCourseList.get(position).getserial()+ userCourseList.get(position).getname(),Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(MainActivity.this,PersonalNoteList.class);
                     startActivity(intent);
                 }
@@ -550,10 +547,10 @@ public class MainActivity extends AppCompatActivity
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.personal2, null);
             List<String> p2List = new ArrayList<>();
-            for (int i = 0; i < list.size(); i++) {
-                String serial = list.get(i).getserial();
-                String name = list.get(i).getname();
-                String teather = list.get(i).getteacher();
+            for (int i = 0; i < userCourseList.size(); i++) {
+                String serial = userCourseList.get(i).getserial();
+                String name = userCourseList.get(i).getname();
+                String teather = userCourseList.get(i).getteacher();
                 p2List.add(serial+" "+name);
             }
 
@@ -563,7 +560,7 @@ public class MainActivity extends AppCompatActivity
             person2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+list.get(position).getserial()+list.get(position).getname(),Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+ userCourseList.get(position).getserial()+ userCourseList.get(position).getname(),Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(MainActivity.this,SharedNotelist.class);
                     startActivity(intent);
                 }
@@ -665,9 +662,9 @@ public class MainActivity extends AppCompatActivity
 
     public void storeCourse(){
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < list.size(); i++) {
-            String serial = list.get(i).getserial();
-            String classfor = list.get(i).getclass_for();
+        for (int i = 0; i < userCourseList.size(); i++) {
+            String serial = userCourseList.get(i).getserial();
+            String classfor = userCourseList.get(i).getclass_for();
             if(serial != null || classfor != null)
                 sb.append(serial).append(",").append(classfor).append(",");
         }

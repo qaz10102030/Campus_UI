@@ -32,7 +32,7 @@ import io.socket.engineio.client.Transport;
  */
 public class ChatSocket {
 
-    private static final String Server = "https://luhao.ddns.net:5050/";
+    private static final String Server = "https://luhao.ddns.net:5000/";
     private Socket mSocket;
     public boolean isConnected;
     private int roomID;
@@ -53,7 +53,7 @@ public class ChatSocket {
                     public void call(Object... args) {
                         @SuppressWarnings("unchecked")
                         Map<String, List<String>> headers = (Map<String, List<String>>) args[0];
-                        headers.put("referer", Collections.singletonList(Server + "/socket/" + roomID));
+                        headers.put("referer", Collections.singletonList(Server + "/socket/yuntech_" + roomID));
                         headers.put("deviceUID", Collections.singletonList(Build.SERIAL));
                     }
                 }).on(Transport.EVENT_RESPONSE_HEADERS, new Emitter.Listener() {

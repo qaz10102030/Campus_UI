@@ -1,6 +1,8 @@
 package net.kaijie.campus_ui;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,11 +19,23 @@ public class TopicChatAdapter extends RecyclerView.Adapter<TopicChatAdapter.View
     private List<String> list;
     private Context context;
 
-    public class Viewholder extends RecyclerView.ViewHolder {
+    public static class Viewholder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView recyText;
-        public Viewholder(View itemView) {
+        private MyItemClickListener mListener;
+        public Viewholder(View itemView, MyItemClickListener listener) {
             super(itemView);
+            mListener = listener;
             recyText = (TextView)itemView.findViewById(R.id.recyText);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            mListener.clickOnView(v, getLayoutPosition());
+        }
+
+        public interface MyItemClickListener {
+            void clickOnView(View v, int position);
         }
     }
 
@@ -31,8 +45,16 @@ public class TopicChatAdapter extends RecyclerView.Adapter<TopicChatAdapter.View
     }
 
     @Override
-    public TopicChatAdapter.Viewholder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new Viewholder(LayoutInflater.from(context).inflate(R.layout.recycler_item,parent,false));
+    public TopicChatAdapter.Viewholder onCreateViewHolder(final ViewGroup parent, int viewType) {
+        return new Viewholder(LayoutInflater.from(context).inflate(R.layout.recycler_item, parent, false), new Viewholder.MyItemClickListener() {
+            @Override
+            public void clickOnView(View v, int position) {
+                Snackbar.make(v, list.get(position), Snackbar.LENGTH_LONG).show();
+                Intent intent = new Intent();
+                intent.setClass(context,ChatActivity.class);
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
