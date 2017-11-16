@@ -159,7 +159,6 @@ public class PersonalNoteList extends AppCompatActivity implements
                     sll_main.setStatus(SwipeListLayout.Status.Close, true);
                     Toast.makeText(PersonalNoteList.this,"修改",Toast.LENGTH_SHORT).show();
                     String content = list_adapter.get(arg0).get(1);
-
                     String title1 = list_adapter.get(arg0).get(0);
 
 
@@ -219,9 +218,6 @@ public class PersonalNoteList extends AppCompatActivity implements
                 startActivity(intent);
 
                 break;
-            //  case Menu.FIRST + 1:
-
-            //  break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -236,7 +232,7 @@ public class PersonalNoteList extends AppCompatActivity implements
         }
         //從資料庫讀取信息
         Cursor cursor = DB.query("note", null, null, null, null, null, null);
-        //startManagingCursor(cursor);
+
         while (cursor.moveToNext()) {
             String name = cursor.getString(cursor.getColumnIndex("content"));
             String title = cursor.getString(cursor.getColumnIndex("title"));
