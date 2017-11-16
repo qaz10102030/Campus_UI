@@ -69,8 +69,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -464,14 +466,53 @@ public class MainActivity extends AppCompatActivity
                     LayoutParams.MATCH_PARENT,
                     LayoutParams.MATCH_PARENT);
             view.setLayoutParams(param);
-            Spinner spinner1 = (Spinner) view.findViewById(R.id.spinner);
+
+            final String[][] courtInfo = new String[][]
+                    {
+                            {"田徑場", "排球場", "籃球場", "司令台後方廣場", "棒壘球場", "網球場", "溜冰場"},
+                            {"綜合球場","羽球場","選手村","桌球教室","韻律教室","柔道教室","B2重訓室","游泳館","體適能中心","視聽教室","B1射箭場","2F撞球桌"}
+                    };
+            final Spinner spinner1 = (Spinner) view.findViewById(R.id.spinner);
             ArrayAdapter<String> sp1 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, new String[]{"室外場地", "體育場"});
             spinner1.setAdapter(sp1);
-            Spinner spinner2 = (Spinner) view.findViewById(R.id.spinner2);
-            ArrayAdapter<String> sp2 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, new String[]{"田徑場", "排球場","籃球場"});
+
+            final Spinner spinner2 = (Spinner) view.findViewById(R.id.spinner2);
+            ArrayAdapter<String> sp2 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, courtInfo[0]);
             spinner2.setAdapter(sp2);
+
+            spinner1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    ArrayAdapter<String> temp = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, courtInfo[position]);
+                    spinner2.setAdapter(temp);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+
+            spinner2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(MainActivity.this, "選了" + parent.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    Toast.makeText(MainActivity.this, "預設" + parent.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
             ListView lvCourt = (ListView)view.findViewById(R.id.lvCourt);
             View headerView = getLayoutInflater().inflate(R.layout.listview_header2, lvCourt, false);
+            TextView tv_court_header = (TextView)headerView.findViewById(R.id.tv_court_header);
+            Date date = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            String dateString = sdf.format(date);
+            String headerInfo = "場地資料日期：" + dateString;
+            tv_court_header.setText(headerInfo);
             lvCourt.addHeaderView(headerView);
             ArrayList<String> fakecourt = new ArrayList<>();
             fakecourt.add("10/16  (一)\n\t田徑隊 徑雲盃 1700-2000\n\t足球隊 1800-2130");
@@ -481,6 +522,7 @@ public class MainActivity extends AppCompatActivity
             fakecourt.add("10/20  (五)\n\t田徑隊 徑雲盃 1700-2000");
             ArrayAdapter<String> court = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, fakecourt);
             lvCourt.setAdapter(court);
+
             addView(view);
         }
     }
