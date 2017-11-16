@@ -2,6 +2,7 @@ package net.kaijie.campus_ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
@@ -51,11 +52,11 @@ public class TopicChatAdapter extends RecyclerView.Adapter<TopicChatAdapter.View
             @Override
             public void clickOnView(View v, int position) {
                 Snackbar.make(v, position + "", Snackbar.LENGTH_LONG).show();
-                MainActivity.mainActivity.chatSocket.connect(position ,"rabbit-phone");
+                MainActivity.mainActivity.chatSocket.connect("yuntech_" + position ,Build.SERIAL);
                 Intent intent = new Intent();
                 Bundle bundle = new Bundle();
                 bundle.putString("roomID", list.get(position));
-                bundle.putString("username","rabbit-phone");
+                bundle.putString("username", Build.SERIAL);
                 intent.putExtras(bundle);
                 intent.setClass(context,ChatActivity.class);
                 context.startActivity(intent);

@@ -35,7 +35,7 @@ public class ChatSocket {
     private static final String Server = "https://luhao.ddns.net:5000/";
     private Socket mSocket;
     public boolean isConnected;
-    private int roomID;
+    private String roomID;
     public static final String Add_User = "add user";
     public static final String Chat_Msg = "chat message";
     private SocketCallback socketCallback;
@@ -106,7 +106,7 @@ public class ChatSocket {
         this.socketCallback = socketCallback;
     }
 
-    public void connect(int roomID, Object... id){
+    public void connect(String roomID, Object... id){
         this.roomID = roomID;
 
         mSocket.connect();
