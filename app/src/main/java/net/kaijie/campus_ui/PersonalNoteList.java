@@ -148,7 +148,25 @@ public class PersonalNoteList extends AppCompatActivity implements
                 public void onClick(View view) {
                     sll_main.setStatus(SwipeListLayout.Status.Close, true);
                     Toast.makeText(PersonalNoteList.this,"刪除",Toast.LENGTH_SHORT).show();
+                    Builder builder = new Builder(PersonalNoteList.this)
+                            .setTitle("刪除筆記")
+                            .setMessage("確定要刪除嗎？")
+                            .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    String content = list_adapter.get(arg0).get(1);
 
+                                    DB.delete("note", "content = ?", new String[]{content});
+                                    RefreshNotesList();
+                                }
+                            })
+                            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            });
+                    builder.create();
+                    builder.show();
                     notifyDataSetChanged();
                 }
             });
@@ -160,8 +178,6 @@ public class PersonalNoteList extends AppCompatActivity implements
                     Toast.makeText(PersonalNoteList.this,"修改",Toast.LENGTH_SHORT).show();
                     String content = list_adapter.get(arg0).get(1);
                     String title1 = list_adapter.get(arg0).get(0);
-
-
                     Intent myIntent = new Intent(PersonalNoteList.this, AddNoteActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putString("title",title1 );
@@ -234,12 +250,12 @@ public class PersonalNoteList extends AppCompatActivity implements
         Cursor cursor = DB.query("note", null, null, null, null, null, null);
 
         while (cursor.moveToNext()) {
-            String name = cursor.getString(cursor.getColumnIndex("content"));
             String title = cursor.getString(cursor.getColumnIndex("title"));
+            String name = cursor.getString(cursor.getColumnIndex("content"));
             String date = cursor.getString(cursor.getColumnIndex("date"));
             List<String> str= new ArrayList<>();
-            str.add(name);
             str.add(title);
+            str.add(name);
             str.add(date);
             dataList.add(str);
 
