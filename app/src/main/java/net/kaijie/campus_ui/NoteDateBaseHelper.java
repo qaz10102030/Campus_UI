@@ -9,27 +9,26 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 
 public class NoteDateBaseHelper extends SQLiteOpenHelper {
-    public static final String CreateNote = "create table note ("
-            + "id integer primary key autoincrement, "
-            + "title text,"
-            + "content text , "
-            + "date text)";
+
+    private final static int DB_VERSION = 1; // 資料庫版本
+    private final static String DB_NAME = "NoteSQLite.db"; //資料庫名稱，附檔名為db
 
     public NoteDateBaseHelper(Context context) {
-        super(context, "note", null, 1);
+        super(context, DB_NAME, null, DB_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-
+        final String CreateNote = "create table note ("
+                + "id integer primary key autoincrement, "
+                + "title text,"
+                + "content text , "
+                + "date text)";
         db.execSQL(CreateNote);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2) {
         // TODO Auto-generated method stub
-
     }
-
-
 }
