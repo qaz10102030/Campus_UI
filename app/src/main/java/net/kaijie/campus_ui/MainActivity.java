@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -513,6 +514,26 @@ public class MainActivity extends AppCompatActivity
             lv_course_chat.addHeaderView(headerView);
             ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, courseList);
             lv_course_chat.setAdapter(adapter);
+            lv_course_chat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    String name = parent.getItemAtPosition(position).toString();
+                    int index = 0;
+                    for (int i = 0; i < userCourseList.size(); i++) {
+                        String temp = userCourseList.get(i).getname();
+                        if(name.equals(temp))
+                            index = i;
+                    }
+                    chatSocket.connect("yuntech_" +  userCourseList.get(index).getserial() , Build.SERIAL);
+                    Intent intent = new Intent();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("roomID",userCourseList.get(index).getserial() + " " + userCourseList.get(index).getname());
+                    bundle.putString("username", Build.SERIAL);
+                    intent.putExtras(bundle);
+                    intent.setClass(MainActivity.this,ChatActivity.class);
+                    startActivity(intent);
+                }
+            });
             addView(view);
         }
     }
