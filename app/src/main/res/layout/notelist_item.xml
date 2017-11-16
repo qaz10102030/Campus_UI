@@ -1,31 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="10dp">
+<net.kaijie.campus_ui.SwipeListLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sll_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tv_title"
+
+    <LinearLayout
+        android:id="@+id/layout_wharfschedule_rightchange"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:orientation="horizontal" >
+        <TextView
+            android:id="@+id/tv_edit"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/course_info_green"
+            android:gravity="center"
+            android:text="修改" />
+        <TextView
+            android:id="@+id/tv_shared"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/course_info_yellow"
+            android:gravity="center"
+            android:text="共用" />
+
+        <TextView
+            android:id="@+id/tv_delete"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/course_info_red"
+            android:gravity="center"
+            android:text="删除" />
+    </LinearLayout>
+    //此处放显示内容
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#000"
-        android:maxLines="1"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Large Text" />
-    <TextView
-        android:id="@+id/tv_content"
-        android:ellipsize="end"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="#000"
-        android:maxLines="1"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Large Text" />
-    <TextView
-        android:id="@+id/tv_date"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="TextView" />
+        android:background="#efefef"
+        android:gravity="center_vertical"
+        android:paddingLeft="10dp"
+        android:orientation="vertical" >
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="Large Text"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#000" />
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/tv_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Large Text"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#000" />
+
+        <TextView
+            android:id="@+id/tv_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    </LinearLayout>
+
+
+
+
+</net.kaijie.campus_ui.SwipeListLayout>

@@ -139,7 +139,7 @@ public class AddCourseActivity extends AppCompatActivity implements
         {
             Intent intent = new Intent();
             Bundle bundle = new Bundle();
-            bundle.putParcelableArrayList("list", (ArrayList<? extends Parcelable>) addCourse);
+            bundle.putParcelableArrayList("userCourseList", (ArrayList<? extends Parcelable>) addCourse);
             intent.putExtra("addCourse",bundle);
             setResult(RESULT_OK, intent);
             finish();
