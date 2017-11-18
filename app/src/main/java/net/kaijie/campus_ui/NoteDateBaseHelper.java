@@ -21,6 +21,7 @@ public class NoteDateBaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         final String CreateNote = "create table note ("
                 + "id integer primary key autoincrement, "
+                + "serial text ,"
                 + "title text,"
                 + "content text , "
                 + "date text)";

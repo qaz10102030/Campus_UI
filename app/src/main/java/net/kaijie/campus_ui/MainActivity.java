@@ -597,7 +597,6 @@ public class MainActivity extends AppCompatActivity
                 String serial = userCourseList.get(i).getserial();
                 String name = userCourseList.get(i).getname();
                 String teather = userCourseList.get(i).getteacher();
-
                 p1List.add(serial+" "+name);
             }
 
@@ -608,8 +607,14 @@ public class MainActivity extends AppCompatActivity
             person1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+ userCourseList.get(position).getserial()+ userCourseList.get(position).getname(),Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+ userCourseList.get(position).getserial()+ userCourseList.get(position).getname(),Toast.LENGTH_SHORT).show();
+                    String serial = userCourseList.get(position).getserial().toString();
+                    String name = userCourseList.get(position).getname().toString();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("serial",serial);
+                    bundle.putString("name",name);
                     Intent intent = new Intent(MainActivity.this,PersonalNoteList.class);
+                    intent.putExtras(bundle);
                     startActivity(intent);
                 }
             });
@@ -636,7 +641,11 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+ userCourseList.get(position).getserial()+ userCourseList.get(position).getname(),Toast.LENGTH_SHORT).show();
+                    String serial = userCourseList.get(position).getserial().toString();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("serial",serial);
                     Intent intent = new Intent(MainActivity.this,SharedNotelist.class);
+                    intent.putExtras(bundle);
                     startActivity(intent);
                 }
             });

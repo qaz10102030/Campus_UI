@@ -49,7 +49,7 @@
         android:background="@color/add_tablayout_color">
 
         <TextView
-            android:id="@+id/tv_text"
+            android:id="@+id/tv_content"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="內容："

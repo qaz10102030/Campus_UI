@@ -69,6 +69,28 @@ public class HttpRequest {
         mQueue.add(getRequest);
     }
 
+    public void postNote(final VolleyCallback callback, final String serial, final String title, final String content, final int mothed) {
+        volleycallback = callback;
+        getRequest = new StringRequest(Request.Method.POST,Server + "/note_shared",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        volleycallback.onSuccess("note", response);
+                    }
+                }, errorlistener){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("serial",serial);
+                params.put("title",title);
+                params.put("content",content);
+                params.put("method",mothed+"");
+                return params;
+            }
+        };
+        getRequest.setRetryPolicy(new DefaultRetryPolicy(VolleyTimeOut,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        mQueue.add(getRequest);
+    }
     public interface VolleyCallback{
         void onSuccess(String label, String result);
         void onError(String error);

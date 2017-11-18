@@ -1,8 +1,10 @@
 package net.kaijie.campus_ui;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.app.AlertDialog.Builder;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -22,6 +24,8 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import net.kaijie.campus_ui.NetworkResource.HttpRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,13 +50,26 @@ public class PersonalNoteList extends AppCompatActivity implements
     private SQLiteDatabase DB;
     private Set<SwipeListLayout> sets = new HashSet();
 
+    private SharedPreferences Notesetting ;//手機的memery;
+    private static final String note_data = "DATA";
+    private static final String note_state ="Note_State";//欄位名稱
+    private String serial;
+    private String name;
+
+    private HttpRequest httpRequest;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.personal_notelist);
+        Bundle bundle=getIntent().getExtras();
+        serial = bundle.getString("serial");
+        name = bundle.getString("name");
 
+        Toast.makeText(PersonalNoteList.this,""+serial+name,Toast.LENGTH_SHORT).show();
         InitView();
+        Notesetting= getSharedPreferences(note_data,0);
 
+        httpRequest = new HttpRequest(PersonalNoteList.this);
 
     }
 
@@ -119,26 +136,58 @@ public class PersonalNoteList extends AppCompatActivity implements
                 view = LayoutInflater.from(PersonalNoteList.this).inflate(
                         R.layout.notelist_item, null);
             }
-            final SwipeListLayout sll_main = (SwipeListLayout) view
-                    .findViewById(R.id.sll_main);
-            TextView tv_shared = (TextView) view.findViewById(R.id.tv_shared);
+            final SwipeListLayout sll_main = (SwipeListLayout) view.findViewById(R.id.sll_main);
+            final TextView tv_shared = (TextView) view.findViewById(R.id.tv_shared);
             TextView tv_delete = (TextView) view.findViewById(R.id.tv_delete);
             TextView tv_edit = (TextView) view.findViewById(R.id.tv_edit);
-            TextView tv_title = (TextView) view.findViewById(R.id.tv_title);
-            TextView tv_content = (TextView) view.findViewById(R.id.tv_content);
+            final TextView tv_title = (TextView) view.findViewById(R.id.tv_title);
+            final TextView tv_content = (TextView) view.findViewById(R.id.tv_content);
             TextView tv_date = (TextView) view.findViewById(R.id.tv_date);
             tv_title.setText(list_adapter.get(arg0).get(0));
             tv_content.setText(list_adapter.get(arg0).get(1));
             tv_date.setText(list_adapter.get(arg0).get(2));
-            sll_main.setOnSwipeStatusListener(new MyOnSlipStatusListener(
-                    sll_main));
+            sll_main.setOnSwipeStatusListener(new MyOnSlipStatusListener(sll_main));
+            if(Notesetting.getBoolean(note_state+arg0,false)){
+                tv_shared.setText("已共用");
+            }else {
+                tv_shared.setText("共用");
+            }
             tv_shared.setOnClickListener(new OnClickListener() {
-
                 @Override
                 public void onClick(View view) {
                     sll_main.setStatus(SwipeListLayout.Status.Close, true);
-                    Toast.makeText(PersonalNoteList.this,"共用",Toast.LENGTH_SHORT).show();
+                    boolean temp = Notesetting.getBoolean(note_state+arg0,false);
+                 //   Toast.makeText(PersonalNoteList.this,"共用",Toast.LENGTH_SHORT).show();
 
+                    if(!temp) {
+                        tv_shared.setText("已共用");
+                        Notesetting.edit().putBoolean(note_state+arg0,true).apply();
+                        httpRequest.postNote(new HttpRequest.VolleyCallback() {
+                            @Override
+                            public void onSuccess(String label, String result) {
+                                Toast.makeText(PersonalNoteList.this,"上傳成功\n"+result,Toast.LENGTH_SHORT).show();
+                            }
+                            @Override
+                            public void onError(String error) {
+                                Toast.makeText(PersonalNoteList.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
+                            }
+                        },serial,tv_title.getText().toString(),tv_content.getText().toString(),1);
+                    }
+                    else {
+
+                        tv_shared.setText("共用");
+                        Notesetting.edit().putBoolean(note_state+arg0,false).apply();
+                        httpRequest.postNote(new HttpRequest.VolleyCallback() {
+                            @Override
+                            public void onSuccess(String label, String result) {
+                                Toast.makeText(PersonalNoteList.this,"上傳成功\n"+result,Toast.LENGTH_SHORT).show();
+                            }
+                            @Override
+                            public void onError(String error) {
+                                Toast.makeText(PersonalNoteList.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
+                            }
+                        },serial,tv_title.getText().toString(),tv_content.getText().toString(),0);
+                    }
                     notifyDataSetChanged();
                 }
             });
@@ -147,7 +196,7 @@ public class PersonalNoteList extends AppCompatActivity implements
                 @Override
                 public void onClick(View view) {
                     sll_main.setStatus(SwipeListLayout.Status.Close, true);
-                    Toast.makeText(PersonalNoteList.this,"刪除",Toast.LENGTH_SHORT).show();
+
                     Builder builder = new Builder(PersonalNoteList.this)
                             .setTitle("刪除筆記")
                             .setMessage("確定要刪除嗎？")
@@ -155,9 +204,22 @@ public class PersonalNoteList extends AppCompatActivity implements
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     String content = list_adapter.get(arg0).get(1);
-
+                                    Notesetting.edit().putBoolean(note_state+arg0,false).apply();
                                     DB.delete("note", "content = ?", new String[]{content});
+
+                                    httpRequest.postNote(new HttpRequest.VolleyCallback() {
+                                        @Override
+                                        public void onSuccess(String label, String result) {
+                                            Toast.makeText(PersonalNoteList.this,"上傳成功\n"+result,Toast.LENGTH_SHORT).show();
+                                        }
+
+                                        @Override
+                                        public void onError(String error) {
+                                            Toast.makeText(PersonalNoteList.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
+                                        }
+                                    },serial,tv_title.getText().toString(),tv_content.getText().toString(),3);
                                     RefreshNotesList();
+                                    Toast.makeText(PersonalNoteList.this,"已刪除",Toast.LENGTH_SHORT).show();
                                 }
                             })
                             .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -178,11 +240,14 @@ public class PersonalNoteList extends AppCompatActivity implements
                     Toast.makeText(PersonalNoteList.this,"修改",Toast.LENGTH_SHORT).show();
                     String content = list_adapter.get(arg0).get(1);
                     String title1 = list_adapter.get(arg0).get(0);
+
                     Intent myIntent = new Intent(PersonalNoteList.this, AddNoteActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putString("title",title1 );
                     bundle.putString("info", content);
                     bundle.putInt("enter_state", 1);
+                    bundle.putString("serial",serial);
+                    bundle.putInt("arg0",arg0);
                     myIntent.putExtras(bundle);
                     startActivityForResult(myIntent,1);
                     notifyDataSetChanged();
@@ -230,6 +295,7 @@ public class PersonalNoteList extends AppCompatActivity implements
                 bundle.putString("title","");
                 bundle.putString("info","");
                 bundle.putInt("enter_state", 0);
+                bundle.putString("serial",serial);
                 intent.putExtras(bundle);
                 startActivity(intent);
 
@@ -247,7 +313,7 @@ public class PersonalNoteList extends AppCompatActivity implements
             listAdapter.notifyDataSetChanged();
         }
         //從資料庫讀取信息
-        Cursor cursor = DB.query("note", null, null, null, null, null, null);
+        Cursor cursor = DB.query("note", null, "serial= ?", new String[]{serial}, null, null, null);
 
         while (cursor.moveToNext()) {
             String title = cursor.getString(cursor.getColumnIndex("title"));
@@ -304,6 +370,7 @@ public class PersonalNoteList extends AppCompatActivity implements
         bundle.putString("title",title1 );
         bundle.putString("info", content1);
         bundle.putInt("enter_state", 1);
+        bundle.putString("serial",serial);
         myIntent.putExtras(bundle);
         startActivity(myIntent);
 
