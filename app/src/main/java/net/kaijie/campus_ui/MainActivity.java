@@ -135,6 +135,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mainActivity = this;
+        httpRequest = new HttpRequest(MainActivity.this);
         settings = getSharedPreferences(marker_data,0);
         initData();
         initView();
@@ -504,25 +505,32 @@ public class MainActivity extends AppCompatActivity
                     Toast.makeText(MainActivity.this, "預設" + parent.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
                 }
             });
-
             ListView lvCourt = (ListView)view.findViewById(R.id.lvCourt);
             View headerView = getLayoutInflater().inflate(R.layout.listview_header2, lvCourt, false);
             TextView tv_court_header = (TextView)headerView.findViewById(R.id.tv_court_header);
             Date date = new Date();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            String dateString = sdf.format(date);
-            String headerInfo = "場地資料日期：" + dateString;
+            int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(date)) - 1911;
+            String month = new SimpleDateFormat("MM").format(date);
+            String courtDate = year + month + courseTableView.getOneWeekDatesOfMonth()[0] + "-" +
+                    year + month + courseTableView.getOneWeekDatesOfMonth()[6];
+            String headerInfo = "場地資料日期：" + courtDate;
             tv_court_header.setText(headerInfo);
             lvCourt.addHeaderView(headerView);
-            ArrayList<String> fakecourt = new ArrayList<>();
-            fakecourt.add("10/16  (一)\n\t田徑隊 徑雲盃 1700-2000\n\t足球隊 1800-2130");
-            fakecourt.add("10/17  (二)\n\t田徑隊 徑雲盃 1700-2000");
-            fakecourt.add("10/18  (三)\n\t田徑隊 徑雲盃 1700-2000");
-            fakecourt.add("10/19  (四)\n\t田徑隊 徑雲盃 1700-2000\n\t足球隊 1800-2130");
-            fakecourt.add("10/20  (五)\n\t田徑隊 徑雲盃 1700-2000");
-            ArrayAdapter<String> court = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, fakecourt);
+            final ArrayList<String> court_data = new ArrayList<>();
+            final ArrayAdapter<String> court = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, court_data);
             lvCourt.setAdapter(court);
+            httpRequest.postCourt(new HttpRequest.VolleyCallback() {
+                @Override
+                public void onSuccess(String label, String result) {
+                    court_data.add("abc");
+                    court.notifyDataSetChanged();
+                }
 
+                @Override
+                public void onError(String error) {
+
+                }
+            },courtDate);
             addView(view);
         }
     }
@@ -755,7 +763,6 @@ public class MainActivity extends AppCompatActivity
         mapArea = CommonMethod.BuildingArea();
 
         //建立Request物件
-        httpRequest = new HttpRequest(MainActivity.this);
         chatSocket = new ChatSocket(socketCallback);
         boolean courseReady = settings.getBoolean(isCourseDataReady,false);
         if(!checkCourseData() || !courseReady){
@@ -1156,8 +1163,11 @@ public class MainActivity extends AppCompatActivity
     public HttpRequest.VolleyCallback callback = new HttpRequest.VolleyCallback() {
         @Override
         public void onSuccess(String label, String result) {
-            //分析課程資料
-            analysis_course(result);
+            switch (label){
+                case "course":
+                    analysis_course(result);
+                    break;
+            }
         }
 
         @Override

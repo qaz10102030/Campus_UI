@@ -51,7 +51,6 @@ public class TopicChatAdapter extends RecyclerView.Adapter<TopicChatAdapter.View
         return new Viewholder(LayoutInflater.from(context).inflate(R.layout.recycler_item, parent, false), new Viewholder.MyItemClickListener() {
             @Override
             public void clickOnView(View v, int position) {
-                Snackbar.make(v, position + "", Snackbar.LENGTH_LONG).show();
                 MainActivity.mainActivity.chatSocket.connect("yuntech_" + position ,Build.SERIAL);
                 Intent intent = new Intent();
                 Bundle bundle = new Bundle();
