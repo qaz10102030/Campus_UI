@@ -109,18 +109,19 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                     ContentValues values = new ContentValues();
                     values.put("content", content);
                     values.put("title", title);
+
                     if(Notesetting.getBoolean(note_state+arg0,false))
                     {
-                        httpRequest.postNote(new HttpRequest.VolleyCallback() {
+                        httpRequest.modifyNote(new HttpRequest.VolleyCallback() {
                             @Override
                             public void onSuccess(String label, String result) {
                                 Toast.makeText(AddNoteActivity.this,"上傳成功\n"+result,Toast.LENGTH_SHORT).show();
-                            }
+                                }
                             @Override
                             public void onError(String error) {
                                 Toast.makeText(AddNoteActivity.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
-                            }
-                        },serial,title,content,2);
+                              }
+                        },serial,last_title,last_content,title,content,2);
                     }
                     db.update("note", values, "content =? and title = ?", new String[]{last_content,last_title});
                     finish();
