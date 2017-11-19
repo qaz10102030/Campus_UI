@@ -338,7 +338,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
     class SamplePagerAdapter extends PagerAdapter{
         @Override
         public int getCount(){
@@ -476,11 +475,23 @@ public class MainActivity extends AppCompatActivity
             final Spinner spinner1 = (Spinner) view.findViewById(R.id.spinner);
             ArrayAdapter<String> sp1 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, new String[]{"室外場地", "體育場"});
             spinner1.setAdapter(sp1);
-
             final Spinner spinner2 = (Spinner) view.findViewById(R.id.spinner2);
             ArrayAdapter<String> sp2 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, courtInfo[0]);
             spinner2.setAdapter(sp2);
-
+            ListView lvCourt = (ListView)view.findViewById(R.id.lvCourt);
+            View headerView = getLayoutInflater().inflate(R.layout.listview_header2, lvCourt, false);
+            TextView tv_court_header = (TextView)headerView.findViewById(R.id.tv_court_header);
+            Date date = new Date();
+            int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(date)) - 1911;
+            final String month = new SimpleDateFormat("MM").format(date);
+            final String courtDate = year + month + courseTableView.getOneWeekDatesOfMonth()[0] + "-" +
+                    year + month + courseTableView.getOneWeekDatesOfMonth()[6];
+            String headerInfo = "場地資料日期：" + courtDate;
+            tv_court_header.setText(headerInfo);
+            lvCourt.addHeaderView(headerView);
+            final ArrayList<String> court_data = new ArrayList<>();
+            final ArrayAdapter<String> court = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, court_data);
+            lvCourt.setAdapter(court);
             spinner1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -493,44 +504,79 @@ public class MainActivity extends AppCompatActivity
 
                 }
             });
-
             spinner2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                public void onItemSelected(final AdapterView<?> parent, View view, int position, long id) {
                     Toast.makeText(MainActivity.this, "選了" + parent.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
+                    httpRequest.postCourt(new HttpRequest.VolleyCallback() {
+                        @Override
+                        public void onSuccess(String label, String result) {
+                            try {
+                                court_data.clear();
+                                JSONArray jsonArray = new JSONArray(result);
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    JSONObject temp = jsonArray.getJSONObject(i);
+                                    if(temp.getString("name").equals(parent.getSelectedItem().toString()))
+                                    {
+                                        JSONArray state = temp.getJSONArray("state");
+                                        for (int j = 0; j < 7; j++) {
+                                            String info = month + "/" + courseTableView.getOneWeekDatesOfMonth()[j] + "\n\t";
+                                            if(state.getString(j).equals(""))
+                                                court_data.add(info + "////////無借用資訊////////");
+                                            else
+                                                court_data.add(info + state.getString(j));
+                                        }
+                                    }
+                                }
+                            }
+                            catch (JSONException ignored){
+                            }
+                            court.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onError(String error) {
+
+                        }
+                    },courtDate);
                 }
 
                 @Override
-                public void onNothingSelected(AdapterView<?> parent) {
+                public void onNothingSelected(final AdapterView<?> parent) {
                     Toast.makeText(MainActivity.this, "預設" + parent.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
+                    httpRequest.postCourt(new HttpRequest.VolleyCallback() {
+                        @Override
+                        public void onSuccess(String label, String result) {
+                            try {
+                                court_data.clear();
+                                JSONArray jsonArray = new JSONArray(result);
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    JSONObject temp = jsonArray.getJSONObject(i);
+                                    if(temp.getString("name").equals(parent.getSelectedItem().toString()))
+                                    {
+                                        JSONArray state = temp.getJSONArray("state");
+                                        for (int j = 0; j < 7; j++) {
+                                            String info = month + "/" + courseTableView.getOneWeekDatesOfMonth()[j] + "\n\t";
+                                            if(state.getString(j).equals(""))
+                                                court_data.add(info + "////////無借用資訊////////");
+                                            else
+                                                court_data.add(info + state.getString(j));
+                                        }
+                                    }
+                                }
+                            }
+                            catch (JSONException ignored){
+                            }
+                            court.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onError(String error) {
+
+                        }
+                    },courtDate);
                 }
             });
-            ListView lvCourt = (ListView)view.findViewById(R.id.lvCourt);
-            View headerView = getLayoutInflater().inflate(R.layout.listview_header2, lvCourt, false);
-            TextView tv_court_header = (TextView)headerView.findViewById(R.id.tv_court_header);
-            Date date = new Date();
-            int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(date)) - 1911;
-            String month = new SimpleDateFormat("MM").format(date);
-            String courtDate = year + month + courseTableView.getOneWeekDatesOfMonth()[0] + "-" +
-                    year + month + courseTableView.getOneWeekDatesOfMonth()[6];
-            String headerInfo = "場地資料日期：" + courtDate;
-            tv_court_header.setText(headerInfo);
-            lvCourt.addHeaderView(headerView);
-            final ArrayList<String> court_data = new ArrayList<>();
-            final ArrayAdapter<String> court = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, court_data);
-            lvCourt.setAdapter(court);
-            httpRequest.postCourt(new HttpRequest.VolleyCallback() {
-                @Override
-                public void onSuccess(String label, String result) {
-                    court_data.add("abc");
-                    court.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onError(String error) {
-
-                }
-            },courtDate);
             addView(view);
         }
     }
