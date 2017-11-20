@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -176,6 +177,11 @@ public class PersonalNoteList extends AppCompatActivity implements
                             public void onError(String error) {
                                 Toast.makeText(PersonalNoteList.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
                             }
+
+                            @Override
+                            public void onImageSuccess(String label, Bitmap result) {
+
+                            }
                         },serial,tv_title.getText().toString(),tv_content.getText().toString(),1);
                       RefreshNotesList();
                    }
@@ -191,8 +197,17 @@ public class PersonalNoteList extends AppCompatActivity implements
                             public void onError(String error) {
                                 Toast.makeText(PersonalNoteList.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
                             }
+<<<<<<< Updated upstream
                         },serial,tv_title.getText().toString(),tv_content.getText().toString(),3);
                        RefreshNotesList();
+=======
+
+                            @Override
+                            public void onImageSuccess(String label, Bitmap result) {
+
+                            }
+                        },serial,tv_title.getText().toString(),tv_content.getText().toString(),0);
+>>>>>>> Stashed changes
                     }
                     notifyDataSetChanged();
                 }
@@ -221,6 +236,11 @@ public class PersonalNoteList extends AppCompatActivity implements
                                         @Override
                                         public void onError(String error) {
                                             Toast.makeText(PersonalNoteList.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
+                                        }
+
+                                        @Override
+                                        public void onImageSuccess(String label, Bitmap result) {
+
                                         }
                                     },serial,tv_title.getText().toString(),tv_content.getText().toString(),3);
                                     RefreshNotesList();

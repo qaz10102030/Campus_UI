@@ -6,12 +6,20 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
@@ -31,6 +39,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -51,6 +60,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.gms.appindexing.Action;
@@ -75,6 +93,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -132,12 +152,26 @@ public class MainActivity extends AppCompatActivity
     public static MainActivity mainActivity;
     private ProgressDialog proDialog;
     private FloatingActionMenu menu;
+    private CallbackManager callbackManager;
     //////////////////////
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_main);
+        /* get package hash key for facebook
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(
+                    "net.kaijie.campus_ui",
+                    PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+        } catch (PackageManager.NameNotFoundException | NoSuchAlgorithmException ignored) {}
+        */
         mainActivity = this;
         httpRequest = new HttpRequest(MainActivity.this);
         settings = getSharedPreferences(marker_data, 0);
@@ -261,6 +295,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
                 Bundle resultBundle = data.getBundleExtra("addCourse");
@@ -425,32 +460,125 @@ public class MainActivity extends AppCompatActivity
             final TextView tv_depart = (TextView) view.findViewById(R.id.tv_depart);
             final TextView tv_user = (TextView) view.findViewById(R.id.tv_user);
             final ImageView iv_userSticker = (ImageView) view.findViewById(R.id.iv_userSticker);
-            final Button bt_fb = (Button) view.findViewById(R.id.bt_fb);
-            bt_fb.setOnClickListener(new OnClickListener() {
+            final Button bt_setDepart = (Button) view.findViewById(R.id.bt_setDepart);
+            bt_setDepart.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    tv_depart.setText("資訊工程系");
-                    tv_user.setText("李冠杰");
-                    iv_userSticker.setImageResource(R.mipmap.fake_sticker);
-                    tv_depart.setVisibility(VISIBLE);
-                    tv_user.setVisibility(VISIBLE);
-                    iv_userSticker.setVisibility(VISIBLE);
-                    bt_fb.setVisibility(GONE);
+
                 }
             });
-            if (tv_depart.getText().equals("") && tv_user.getText().equals("")) {
+            LoginButton loginButton = (LoginButton) view.findViewById(R.id.login_button);
+
+            FB_Login(loginButton,tv_depart,bt_setDepart,tv_user,iv_userSticker);
+            if (tv_user.getText().equals("")) {
                 tv_depart.setVisibility(GONE);
                 tv_user.setVisibility(GONE);
                 iv_userSticker.setVisibility(GONE);
-                bt_fb.setVisibility(VISIBLE);
+                bt_setDepart.setVisibility(GONE);
+                loginButton.setVisibility(VISIBLE);
             } else {
-                tv_depart.setVisibility(VISIBLE);
                 tv_user.setVisibility(VISIBLE);
                 iv_userSticker.setVisibility(VISIBLE);
-                bt_fb.setVisibility(GONE);
+                if(tv_depart.getText().equals(""))
+                    bt_setDepart.setVisibility(VISIBLE);
+                else
+                    tv_depart.setVisibility(VISIBLE);
+                //loginButton.setVisibility(GONE);
             }
             addView(view);
+        }
 
+        private void FB_Login(final LoginButton loginButton ,final TextView tv_depart,final Button bt_setDepart, final TextView tv_user, final ImageView iv_userSticker) {
+            //宣告callback Manager
+            callbackManager = CallbackManager.Factory.create();
+            //找到login button
+            loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+                //登入成功
+                @Override
+                public void onSuccess(LoginResult loginResult) {
+                    //accessToken之後或許還會用到 先存起來
+                    AccessToken accessToken = loginResult.getAccessToken();
+                    Log.d("FB_test","access token got.");
+                    //send request and call graph api
+                    GraphRequest request = GraphRequest.newMeRequest(
+                            accessToken,
+                            new GraphRequest.GraphJSONObjectCallback() {
+                                //當RESPONSE回來的時候
+                                @Override
+                                public void onCompleted(JSONObject object, GraphResponse response) {
+                                    //讀出姓名 ID FB個人頁面連結
+                                    Log.d("FB_test","complete");
+                                    Log.d("FB_test",object.optString("name"));
+                                    Log.d("FB_test",object.optString("link"));
+                                    Log.d("FB_test",object.optString("id"));
+                                    String userinfo = "User name: " + object.optString("name") +
+                                            "\nUser ID: " + object.optString("id") +
+                                            "\nUser Link:\n" + object.optString("link");
+                                    tv_user.setText(object.optString("name"));
+                                    String url = "https://graph.facebook.com/"+object.optString("id")+"/picture?type=large&w\u200C\u200Bidth=400&height=400";
+                                    httpRequest.getSticker(new HttpRequest.VolleyCallback() {
+                                        @Override
+                                        public void onSuccess(String label, String result) {
+
+                                        }
+
+                                        @Override
+                                        public void onError(String error) {
+
+                                        }
+
+                                        @Override
+                                        public void onImageSuccess(String label, Bitmap result) {
+                                            iv_userSticker.setImageBitmap(getCircleBitmap(result));
+                                            tv_user.setVisibility(VISIBLE);
+                                            iv_userSticker.setVisibility(VISIBLE);
+                                            if(tv_depart.getText().equals(""))
+                                                bt_setDepart.setVisibility(VISIBLE);
+                                            else
+                                                tv_depart.setVisibility(VISIBLE);
+                                        }
+                                    },url);
+                                }
+                            });
+                    //包入你想要得到的資料 送出request
+                    Bundle parameters = new Bundle();
+                    parameters.putString("fields", "id,name,link");
+                    request.setParameters(parameters);
+                    request.executeAsync();
+                }
+                //登入取消
+                @Override
+                public void onCancel() {
+                    // App code
+                    Log.d("FB_test","CANCEL");
+                }
+                //登入失敗
+                @Override
+                public void onError(FacebookException exception) {
+                    // App code
+                    Log.d("FB_test",exception.toString());
+                }
+            });
+        }
+
+        public Bitmap getCircleBitmap(Bitmap bitmap) {
+            Bitmap output = Bitmap.createBitmap( bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas( output);
+
+            final int color = 0xff424242;
+            final Paint paint = new Paint();
+            final Rect rect = new Rect( 0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+            paint.setAntiAlias( true);
+            paint.setFilterBitmap( true);
+            paint.setDither( true);
+            canvas.drawARGB( 0, 0, 0, 0);
+            paint.setColor( color);
+            //在画布上绘制一个圆
+            canvas.drawCircle( bitmap.getWidth() / 2, bitmap.getHeight() / 2, bitmap.getWidth() / 2, paint);
+            paint.setXfermode( new PorterDuffXfermode( PorterDuff.Mode.SRC_IN));
+            canvas.drawBitmap( bitmap, rect, rect, paint);
+            return output;
         }
     }
 
@@ -638,6 +766,11 @@ public class MainActivity extends AppCompatActivity
                                 public void onError(String error) {
                                     Toast.makeText(MainActivity.this, "伺服器出錯啦><\n" + error, Toast.LENGTH_SHORT).show();
                                 }
+
+                                @Override
+                                public void onImageSuccess(String label, Bitmap result) {
+
+                                }
                             }, courtDate);
                         } else {
                             spinner3.setVisibility(GONE);
@@ -680,6 +813,11 @@ public class MainActivity extends AppCompatActivity
                                 @Override
                                 public void onError(String error) {
                                     Toast.makeText(MainActivity.this, "伺服器出錯啦><\n" + error, Toast.LENGTH_SHORT).show();
+                                }
+
+                                @Override
+                                public void onImageSuccess(String label, Bitmap result) {
+
                                 }
                             }, courtDate);
                         }
@@ -772,6 +910,11 @@ public class MainActivity extends AppCompatActivity
                                 public void onError(String error) {
                                     Toast.makeText(MainActivity.this, "伺服器出錯啦><\n" + error, Toast.LENGTH_SHORT).show();
                                 }
+
+                                @Override
+                                public void onImageSuccess(String label, Bitmap result) {
+
+                                }
                             }, courtDate);
                         } else {
                             spinner3.setVisibility(GONE);
@@ -814,6 +957,11 @@ public class MainActivity extends AppCompatActivity
                                 @Override
                                 public void onError(String error) {
                                     Toast.makeText(MainActivity.this, "伺服器出錯啦><\n" + error, Toast.LENGTH_SHORT).show();
+                                }
+
+                                @Override
+                                public void onImageSuccess(String label, Bitmap result) {
+
                                 }
                             }, courtDate);
                         }
@@ -1494,6 +1642,11 @@ public class MainActivity extends AppCompatActivity
             proDialog.dismiss();
             Toast.makeText(MainActivity.this, "伺服器出錯啦><\n" + error, Toast.LENGTH_SHORT).show();
             Log.d("Volley", error);
+        }
+
+        @Override
+        public void onImageSuccess(String label, Bitmap result) {
+
         }
     };
     public ChatSocket.SocketCallback socketCallback = new ChatSocket.SocketCallback() {

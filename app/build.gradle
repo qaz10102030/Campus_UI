@@ -36,4 +36,5 @@ dependencies {
     compile('io.socket:socket.io-client:0.7.0') {
         exclude group: 'org.json', module: 'json'
     }
+    compile 'com.facebook.android:facebook-login:[4,5)'
 }

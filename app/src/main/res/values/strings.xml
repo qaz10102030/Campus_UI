@@ -3,4 +3,6 @@
     <string name="day">day</string>
     <string name="actionbar_title">課程列表</string>
     <string name="send_hint">說點甚麼吧~</string>
+    <string name="facebook_app_id">1853308978278649</string>
+    <string name="fb_login_protocol_scheme">fb1853308978278649</string>
 </resources>

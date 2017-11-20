@@ -3,6 +3,7 @@ package net.kaijie.campus_ui;
 import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -119,6 +120,11 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                             public void onError(String error) {
                                 Toast.makeText(AddNoteActivity.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
                               }
+
+                            @Override
+                            public void onImageSuccess(String label, Bitmap result) {
+
+                            }
                         },serial,last_title,last_content,title,content,2);
                     }*/
                     db.update("note", values, "content =? and title = ?", new String[]{last_content,last_title});

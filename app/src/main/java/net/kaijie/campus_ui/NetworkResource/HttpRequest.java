@@ -1,6 +1,8 @@
 package net.kaijie.campus_ui.NetworkResource;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.widget.ImageView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
@@ -8,6 +10,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -47,6 +50,18 @@ public class HttpRequest {
                 }, errorlistener);
         getRequest.setRetryPolicy(new DefaultRetryPolicy(VolleyTimeOut,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         mQueue.add(getRequest);
+    }
+
+    public void getSticker(final VolleyCallback callback,String url) {
+        volleycallback = callback;
+        ImageRequest getImage = new ImageRequest(url, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap response) {
+                volleycallback.onImageSuccess("getimage", response);
+            }
+        }, 400, 400, ImageView.ScaleType.CENTER_INSIDE, Bitmap.Config.RGB_565, errorlistener);
+        getImage.setRetryPolicy(new DefaultRetryPolicy(VolleyTimeOut,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        mQueue.add(getImage);
     }
 
     public void postCourt(final VolleyCallback callback, final String date) {
@@ -117,5 +132,6 @@ public class HttpRequest {
     public interface VolleyCallback{
         void onSuccess(String label, String result);
         void onError(String error);
+        void onImageSuccess(String label ,Bitmap result);
     }
 }

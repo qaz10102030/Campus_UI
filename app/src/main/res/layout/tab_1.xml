@@ -10,13 +10,14 @@
 
         <LinearLayout
             android:orientation="horizontal"
-            android:layout_width="200dp"
-            android:layout_height="80dp"
-            android:layout_gravity="center_horizontal">
+            android:layout_width="300dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="10dp">
 
             <ImageView
                 android:id="@+id/iv_userSticker"
-                android:layout_width="80dp"
+                android:layout_width="120dp"
                 android:layout_height="match_parent"
                 android:scaleType="fitXY"
                 android:layout_gravity="center_horizontal" />
@@ -36,6 +37,13 @@
                     android:layout_margin="3dp"
                     android:layout_gravity="center_horizontal" />
 
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="設定系別"
+                    android:id="@+id/bt_setDepart"
+                    android:layout_gravity="center_horizontal" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -45,12 +53,12 @@
                     android:layout_gravity="center_horizontal"
                     android:layout_margin="3dp" />
 
-                <Button
+                <com.facebook.login.widget.LoginButton
+                    android:id="@+id/login_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="FB登入"
-                    android:id="@+id/bt_fb"
-                    android:layout_gravity="center_horizontal" />
+                    android:layout_gravity="center_horizontal"/>
+
             </LinearLayout>
 
         </LinearLayout>
