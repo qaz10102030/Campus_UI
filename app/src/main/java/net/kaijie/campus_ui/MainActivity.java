@@ -1,5 +1,6 @@
 package net.kaijie.campus_ui;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -40,7 +41,9 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -50,6 +53,9 @@ import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -75,7 +81,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -90,7 +95,6 @@ public class MainActivity extends AppCompatActivity
         GoogleMap.OnMapClickListener,
         View.OnClickListener,
         CourseTableView.OnCourseItemClickListener
-
         ////////////
 {
     //kaijie
@@ -105,9 +109,9 @@ public class MainActivity extends AppCompatActivity
     private Marker singleMarker;
     private LatLng latlng;
     private BitmapDescriptor icon;
-    private HashMap<String, HashMap<String, ArrayList<LatLng>>> mapArea=null;
-    private static final String yuntech_json  = "[{\"college\":\"工程學院\",\"department\":[{\"name\":\"工程一館\",\"code\":\"EM\"},{\"name\":\"工程二館\",\"code\":\"EL\"},{\"name\":\"工程三館\",\"code\":\"ES\"},{\"name\":\"工程四館\",\"code\":\"EC\"},{\"name\":\"工程五館\",\"code\":\"EB\",\"floor\":[{\"floor_num\":\"1F\",\"classroom\":[{\"type\":\"電腦教室\",\"number\":\"EB102\"},{\"type\":\"一般教室\",\"number\":\"EB109\"},{\"type\":\"一般教室\",\"number\":\"EB110\"}]},{\"floor_num\":\"2F\",\"classroom\":[{\"type\":\"實驗室\",\"number\":\"EB201\"},{\"type\":\"一般教室\",\"number\":\"EB202\"}]}]},{\"name\":\"工程六館\",\"code\":\"EN\"}]}]";
-    private HashMap<String, HashMap<String, List<LatLng>>> buildkind=null;
+    private HashMap<String, HashMap<String, ArrayList<LatLng>>> mapArea = null;
+    private static final String yuntech_json = "[{\"college\":\"工程學院\",\"department\":[{\"name\":\"工程一館\",\"code\":\"EM\"},{\"name\":\"工程二館\",\"code\":\"EL\"},{\"name\":\"工程三館\",\"code\":\"ES\"},{\"name\":\"工程四館\",\"code\":\"EC\"},{\"name\":\"工程五館\",\"code\":\"EB\",\"floor\":[{\"floor_num\":\"1F\",\"classroom\":[{\"type\":\"電腦教室\",\"number\":\"EB102\"},{\"type\":\"一般教室\",\"number\":\"EB109\"},{\"type\":\"一般教室\",\"number\":\"EB110\"}]},{\"floor_num\":\"2F\",\"classroom\":[{\"type\":\"實驗室\",\"number\":\"EB201\"},{\"type\":\"一般教室\",\"number\":\"EB202\"}]}]},{\"name\":\"工程六館\",\"code\":\"EN\"}]}]";
+    private HashMap<String, HashMap<String, List<LatLng>>> buildkind = null;
     private ArrayList<Marker> mMarkers = new ArrayList<>();
     private ArrayAdapter<String> adFloor;
     public ImageButton bt_navigation;
@@ -136,7 +140,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         mainActivity = this;
         httpRequest = new HttpRequest(MainActivity.this);
-        settings = getSharedPreferences(marker_data,0);
+        settings = getSharedPreferences(marker_data, 0);
         initData();
         initView();
 
@@ -156,11 +160,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     //kaijie
-    public void initclass()  {
-        String userCourse = settings.getString(courseData,"");
-        if(userCourse.equals("")){
-            Toast.makeText(MainActivity.this,"無使用者選課資料",Toast.LENGTH_SHORT).show();
-        }else {
+    public void initclass() {
+        String userCourse = settings.getString(courseData, "");
+        if (userCourse.equals("")) {
+            Toast.makeText(MainActivity.this, "無使用者選課資料", Toast.LENGTH_SHORT).show();
+        } else {
             ArrayList<Course> tempCourse = selectCourse();
             String[] dataList = userCourse.split(",");
             if (tempCourse != null) {
@@ -179,10 +183,10 @@ public class MainActivity extends AppCompatActivity
 
     private ArrayList<Course> selectCourse() {
         ArrayList<Course> temp = new ArrayList<>();
-        SQLiteDatabase db = SQLiteDatabase.openDatabase(getFilesDir() + "class_database.db", null,SQLiteDatabase.OPEN_READONLY);
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(getFilesDir() + "class_database.db", null, SQLiteDatabase.OPEN_READONLY);
         String selectCourse = "select * from tb_course";
         try {
-            Cursor cursor = db.rawQuery(selectCourse,null);
+            Cursor cursor = db.rawQuery(selectCourse, null);
             cursor.moveToFirst();
             for (int i = 0; i < cursor.getCount(); i++) {
                 Course tempCourse = new Course();
@@ -203,11 +207,9 @@ public class MainActivity extends AppCompatActivity
                 cursor.moveToNext();
             }
             cursor.close();
-            Log.d("SQLite","course data is ready");
-        }
-        catch (SQLiteException e)
-        {
-            Log.d("SQLite",e.getMessage());
+            Log.d("SQLite", "course data is ready");
+        } catch (SQLiteException e) {
+            Log.d("SQLite", e.getMessage());
             return null;
         }
         db.close();
@@ -215,14 +217,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initData() {
-        mTabLayout = (TabLayout)findViewById(R.id.tabs);
+        mTabLayout = (TabLayout) findViewById(R.id.tabs);
         mTabLayout.addTab(mTabLayout.newTab().setText("個人").setIcon(R.drawable.ic_person));
         mTabLayout.addTab(mTabLayout.newTab().setText("課程").setIcon(R.drawable.ic_class));
         mTabLayout.addTab(mTabLayout.newTab().setText("地圖").setIcon(R.drawable.ic_yuntech));
         mTabLayout.addTab(mTabLayout.newTab().setText("運動").setIcon(R.drawable.ic_sport));
         mTabLayout.addTab(mTabLayout.newTab().setText("聊天").setIcon(R.drawable.ic_chat));
         //取得TabLayout
-        LinearLayout linearLayout=(LinearLayout)mTabLayout.getChildAt(0);
+        LinearLayout linearLayout = (LinearLayout) mTabLayout.getChildAt(0);
         linearLayout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
         linearLayout.setDividerDrawable(ContextCompat.getDrawable(this,
                 R.drawable.layout_divider_vertical));
@@ -237,20 +239,20 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initView() {
-        mViewPager = (ViewPager)findViewById(R.id.viewpager);
+        mViewPager = (ViewPager) findViewById(R.id.viewpager);
         mViewPager.setAdapter(new SamplePagerAdapter());
     }
 
     @Override
     public void onClick(View view) {
         int id = view.getId();
-        switch (id){
+        switch (id) {
             case R.id.menu_item:
-                Intent intent = new Intent(this,AddCourseActivity.class);
+                Intent intent = new Intent(this, AddCourseActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putParcelableArrayList("userCourseList", (ArrayList<? extends Parcelable>) userCourseList);
-                intent.putExtra("userCourse",bundle);
-                startActivityForResult(intent,1);
+                intent.putExtra("userCourse", bundle);
+                startActivityForResult(intent, 1);
                 menu.close(true);
                 break;
         }
@@ -260,7 +262,7 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
-            if(resultCode == RESULT_OK) {
+            if (resultCode == RESULT_OK) {
                 Bundle resultBundle = data.getBundleExtra("addCourse");
                 List<Course> temp = resultBundle.getParcelableArrayList("userCourseList");
                 if (temp != null) {
@@ -269,10 +271,8 @@ public class MainActivity extends AppCompatActivity
                     }
                     courseTableView.updateCourseViews(userCourseList);
                 }
-            }
-            else if(resultCode == RESULT_CANCELED)
-            {
-                Toast.makeText(MainActivity.this,"新增失敗",Toast.LENGTH_SHORT).show();
+            } else if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(MainActivity.this, "新增失敗", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -287,20 +287,20 @@ public class MainActivity extends AppCompatActivity
             ArrayAdapter<String> ClassInfo = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1);//設定課程資訊的清單物件要顯示資料的陣列
             into_class.setAdapter(ClassInfo); //定義顯示課程資訊的清單物件
 
-            String course_plan="True";
+            String course_plan = "True";
 
             //  final String[] classes_Item = {"上課教室：","課號：","課程名稱：","授課老師：","教學大綱網站：\n"}; //設定存有課程項目的陣列
             ClassInfo.clear(); //先把清單物件的資料陣列清空
             result_dialog.clear(); //再把要存組合字串的陣列內容清空
             result_dialog.add("上課教室：" + room);
             result_dialog.add("課號：" + serial);
-            result_dialog.add("課程名稱：" + name +"\n( "+ name_eng+ " )");
+            result_dialog.add("課程名稱：" + name + "\n( " + name_eng + " )");
             result_dialog.add("上課節數：" + spanNum);
             result_dialog.add("開課班級：" + class_for);
-            result_dialog.add("修別：" + require +"( "+ require_eng+ " )");
-            result_dialog.add("學分組合：" + credits+"\n( 講授時數-實習時數-學分數 )");
-            result_dialog.add("授課老師：" + teacher+"老師");
-            for(int a = 0;a<result_dialog.size();a++) //把陣列內的資料丟給清單顯示
+            result_dialog.add("修別：" + require + "( " + require_eng + " )");
+            result_dialog.add("學分組合：" + credits + "\n( 講授時數-實習時數-學分數 )");
+            result_dialog.add("授課老師：" + teacher + "老師");
+            for (int a = 0; a < result_dialog.size(); a++) //把陣列內的資料丟給清單顯示
             {
                 ClassInfo.add(result_dialog.get(a)); //將資料加到陣列裡
                 ClassInfo.notifyDataSetChanged(); //通知陣列資料有被更改
@@ -315,12 +315,12 @@ public class MainActivity extends AppCompatActivity
                         public void onClick(DialogInterface dialogInterface, int i) {
                             Toast.makeText(MainActivity.this, "已刪除", Toast.LENGTH_SHORT).show();
                             courseTableView.clearViewsIfNeeded();
-                            Course compare_c=new Course();
+                            Course compare_c = new Course();
                             compare_c.setserial(serial);
-                            int remove_c=0;
-                            for (int j = 0; j < userCourseList.size() ; j++) {
-                                if(userCourseList.get(j).getserial() == compare_c.getserial()){
-                                    remove_c=j;
+                            int remove_c = 0;
+                            for (int j = 0; j < userCourseList.size(); j++) {
+                                if (userCourseList.get(j).getserial() == compare_c.getserial()) {
+                                    remove_c = j;
                                 }
                             }
                             userCourseList.remove(remove_c);
@@ -332,40 +332,43 @@ public class MainActivity extends AppCompatActivity
                         public void onClick(DialogInterface dialog, int which) {
                         }
                     }).show();
-        }
-        catch (Exception e){
-            Log.e("dialog",e.toString());
+        } catch (Exception e) {
+            Log.e("dialog", e.toString());
         }
     }
 
-    class SamplePagerAdapter extends PagerAdapter{
+    class SamplePagerAdapter extends PagerAdapter {
         @Override
-        public int getCount(){
-        return 5;
-        }
-        @Override
-        public boolean isViewFromObject(View view, Object o){
-        return o == view ;
+        public int getCount() {
+            return 5;
         }
 
         @Override
-        public CharSequence getPageTitle(int position){
-            return  "Item" + (position+1);
+        public boolean isViewFromObject(View view, Object o) {
+            return o == view;
         }
+
         @Override
-        public Object instantiateItem(ViewGroup container, int position){
+        public CharSequence getPageTitle(int position) {
+            return "Item" + (position + 1);
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
             container.addView(pageList.get(position));
             return pageList.get(position);
         }
+
         @Override
-        public void destroyItem(ViewGroup container, int position, Object object){
+        public void destroyItem(ViewGroup container, int position, Object object) {
             container.removeView((View) object);
             menu.close(true);
         }
     }
 
-    class SamplePagerAdapter2 extends PagerAdapter{
+    class SamplePagerAdapter2 extends PagerAdapter {
         private ArrayList<PageView> personal;
+
         public SamplePagerAdapter2(ArrayList<PageView> personalPage) {
             personal = personalPage;
         }
@@ -390,6 +393,7 @@ public class MainActivity extends AppCompatActivity
             container.addView(personal.get(position));
             return personal.get(position);
         }
+
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
             container.removeView((View) object);
@@ -401,6 +405,7 @@ public class MainActivity extends AppCompatActivity
             super(context);
         }
     }
+
     public class PageOneView extends PageView {
         public PageOneView(Context context) {
             super(context);
@@ -416,11 +421,40 @@ public class MainActivity extends AppCompatActivity
             mViewPager2.setAdapter(new SamplePagerAdapter2(personalPage));
             mViewPager2.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabs));
             mTabs.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager2));
+
+            final TextView tv_depart = (TextView) view.findViewById(R.id.tv_depart);
+            final TextView tv_user = (TextView) view.findViewById(R.id.tv_user);
+            final ImageView iv_userSticker = (ImageView) view.findViewById(R.id.iv_userSticker);
+            final Button bt_fb = (Button) view.findViewById(R.id.bt_fb);
+            bt_fb.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    tv_depart.setText("資訊工程系");
+                    tv_user.setText("李冠杰");
+                    iv_userSticker.setImageResource(R.mipmap.fake_sticker);
+                    tv_depart.setVisibility(VISIBLE);
+                    tv_user.setVisibility(VISIBLE);
+                    iv_userSticker.setVisibility(VISIBLE);
+                    bt_fb.setVisibility(GONE);
+                }
+            });
+            if (tv_depart.getText().equals("") && tv_user.getText().equals("")) {
+                tv_depart.setVisibility(GONE);
+                tv_user.setVisibility(GONE);
+                iv_userSticker.setVisibility(GONE);
+                bt_fb.setVisibility(VISIBLE);
+            } else {
+                tv_depart.setVisibility(VISIBLE);
+                tv_user.setVisibility(VISIBLE);
+                iv_userSticker.setVisibility(VISIBLE);
+                bt_fb.setVisibility(GONE);
+            }
             addView(view);
 
         }
     }
-    public class PageTwoView extends PageView{
+
+    public class PageTwoView extends PageView {
         public PageTwoView(Context context) {
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.tab_2, null);
@@ -431,26 +465,27 @@ public class MainActivity extends AppCompatActivity
 
 
             menu = (FloatingActionMenu) view.findViewById(R.id.menu);
-            FloatingActionButton floatingActionButton = (FloatingActionButton)view.findViewById(R.id.menu_item);
+            FloatingActionButton floatingActionButton = (FloatingActionButton) view.findViewById(R.id.menu_item);
             floatingActionButton.setOnClickListener(MainActivity.this);
 
 
         }
     }
-    public class PageThreeView extends PageView{
+
+    public class PageThreeView extends PageView {
         public PageThreeView(Context context) {
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.tab_3, null);
 
             //rabbit
             bt_navigation = (ImageButton) view.findViewById(R.id.bt_navigation);
-            bt_navigation.setOnClickListener(new View.OnClickListener() {
+            bt_navigation.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(singleMarker != null)ClickInfoWondows(singleMarker.getPosition());
+                    if (singleMarker != null) ClickInfoWondows(singleMarker.getPosition());
                 }
             });
-            Animation fadeoutfirst = AnimationUtils.loadAnimation(MainActivity.this,R.anim.fade_out_first);
+            Animation fadeoutfirst = AnimationUtils.loadAnimation(MainActivity.this, R.anim.fade_out_first);
             bt_navigation.startAnimation(fadeoutfirst);
             //////////////////////////////////
 
@@ -458,7 +493,8 @@ public class MainActivity extends AppCompatActivity
 
         }
     }
-    public class PageFourView extends PageView{
+
+    public class PageFourView extends PageView {
         public PageFourView(Context context) {
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.tab_4, null);
@@ -470,7 +506,7 @@ public class MainActivity extends AppCompatActivity
             final String[][] courtInfo = new String[][]
                     {
                             {"田徑場", "排球場", "籃球場", "司令台後方廣場", "棒壘球場", "網球場", "溜冰場"},
-                            {"綜合球場","羽球場","選手村","桌球教室","韻律教室","柔道教室","B2重訓室","游泳館","體適能中心","視聽教室","B1射箭場","2F撞球桌"}
+                            {"綜合球場", "羽球場", "選手村", "桌球教室", "韻律教室", "柔道教室", "B2重訓室", "游泳館", "體適能中心", "視聽教室", "B1射箭場", "2F撞球桌"}
                     };
             final Spinner spinner1 = (Spinner) view.findViewById(R.id.spinner);
             ArrayAdapter<String> sp1 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, new String[]{"室外場地", "體育場"});
@@ -478,14 +514,24 @@ public class MainActivity extends AppCompatActivity
             final Spinner spinner2 = (Spinner) view.findViewById(R.id.spinner2);
             ArrayAdapter<String> sp2 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, courtInfo[0]);
             spinner2.setAdapter(sp2);
-            ListView lvCourt = (ListView)view.findViewById(R.id.lvCourt);
+            ListView lvCourt = (ListView) view.findViewById(R.id.lvCourt);
             View headerView = getLayoutInflater().inflate(R.layout.listview_header2, lvCourt, false);
-            TextView tv_court_header = (TextView)headerView.findViewById(R.id.tv_court_header);
+            TextView tv_court_header = (TextView) headerView.findViewById(R.id.tv_court_header);
             Date date = new Date();
             int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(date)) - 1911;
             final String month = new SimpleDateFormat("MM").format(date);
-            final String courtDate = year + month + courseTableView.getOneWeekDatesOfMonth()[0] + "-" +
-                    year + month + courseTableView.getOneWeekDatesOfMonth()[6];
+            String checkMonFir;
+            String checkMonLast;
+            if (Integer.parseInt(courseTableView.getOneWeekDatesOfMonth()[0]) < 10)
+                checkMonFir = "0" + courseTableView.getOneWeekDatesOfMonth()[0];
+            else
+                checkMonFir = courseTableView.getOneWeekDatesOfMonth()[0];
+            if (Integer.parseInt(courseTableView.getOneWeekDatesOfMonth()[6]) < 10)
+                checkMonLast = "0" + courseTableView.getOneWeekDatesOfMonth()[6];
+            else
+                checkMonLast = courseTableView.getOneWeekDatesOfMonth()[6];
+
+            final String courtDate = year + month + checkMonFir + "-" + year + month + checkMonLast;
             String headerInfo = "場地資料日期：" + courtDate;
             tv_court_header.setText(headerInfo);
             lvCourt.addHeaderView(headerView);
@@ -504,88 +550,289 @@ public class MainActivity extends AppCompatActivity
 
                 }
             });
+
+            final Spinner spinner3 = (Spinner) view.findViewById(R.id.spinner3);
+            final TextView tv_choseCourt = (TextView) view.findViewById(R.id.tv_choseCourt);
+
             spinner2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(final AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(MainActivity.this, "選了" + parent.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
-                    httpRequest.postCourt(new HttpRequest.VolleyCallback() {
-                        @Override
-                        public void onSuccess(String label, String result) {
-                            try {
-                                court_data.clear();
-                                JSONArray jsonArray = new JSONArray(result);
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    JSONObject temp = jsonArray.getJSONObject(i);
-                                    if(temp.getString("name").equals(parent.getSelectedItem().toString()))
-                                    {
-                                        JSONArray state = temp.getJSONArray("state");
-                                        for (int j = 0; j < 7; j++) {
-                                            String info = month + "/" + courseTableView.getOneWeekDatesOfMonth()[j] + "\n\t";
-                                            if(state.getString(j).equals(""))
-                                                court_data.add(info + "////////無借用資訊////////");
-                                            else
-                                                court_data.add(info + state.getString(j));
+                    String courtType = parent.getSelectedItem().toString();
+                    try {
+                        court_data.clear();
+                        if (courtType.matches("排球場|籃球場|網球場|綜合球場|羽球場|視聽教室")) {
+                            spinner3.setVisibility(VISIBLE);
+                            tv_choseCourt.setVisibility(VISIBLE);
+                            httpRequest.postCourt(new HttpRequest.VolleyCallback() {
+                                @Override
+                                public void onSuccess(String label, String result) {
+                                    try {
+                                        JSONArray jsonArray = new JSONArray(result);
+                                        for (int i = 0; i < jsonArray.length(); i++) {
+                                            JSONObject temp = jsonArray.getJSONObject(i);
+                                            if (temp.getString("name").equals(parent.getSelectedItem().toString())) {
+                                                final JSONArray state = temp.getJSONArray("state");
+                                                final List<String> multiCourt = new ArrayList<>();
+                                                for (int j = 0; j < state.length(); j++) {
+                                                    String innerCourt = state.getJSONObject(j).getString("court");
+                                                    multiCourt.add(innerCourt);
+                                                }
+                                                ArrayAdapter<String> sp3 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, multiCourt);
+                                                spinner3.setAdapter(sp3);
+                                                spinner3.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                                    @Override
+                                                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                                        court_data.clear();
+                                                        String seleCourt = parent.getSelectedItem().toString();
+                                                        try {
+                                                            for (int x = 0; x < state.length(); x++) {
+                                                                if (state.getJSONObject(x).getString("court").equals(seleCourt)) {
+                                                                    JSONArray innerState = state.getJSONObject(x).getJSONArray("state");
+                                                                    for (int j = 0; j < 7; j++) {
+                                                                        String info = month + "/" + courseTableView.getOneWeekDatesOfMonth()[j] + "\n\t";
+                                                                        if (innerState.getString(j).equals(""))
+                                                                            court_data.add(info + "////////無借用資訊////////");
+                                                                        else
+                                                                            court_data.add(info + innerState.getString(j));
+                                                                    }
+                                                                    court.notifyDataSetChanged();
+                                                                }
+                                                            }
+                                                        } catch (JSONException e) {
+                                                            Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onNothingSelected(AdapterView<?> parent) {
+                                                        court_data.clear();
+                                                        String seleCourt = parent.getSelectedItem().toString();
+                                                        try {
+                                                            for (int x = 0; x < state.length(); x++) {
+                                                                if (state.getJSONObject(x).getString("court").equals(seleCourt)) {
+                                                                    JSONArray innerState = state.getJSONObject(x).getJSONArray("state");
+                                                                    for (int j = 0; j < 7; j++) {
+                                                                        String info = month + "/" + courseTableView.getOneWeekDatesOfMonth()[j] + "\n\t";
+                                                                        if (innerState.getString(j).equals(""))
+                                                                            court_data.add(info + "////////無借用資訊////////");
+                                                                        else
+                                                                            court_data.add(info + innerState.getString(j));
+                                                                    }
+                                                                    court.notifyDataSetChanged();
+                                                                }
+                                                            }
+                                                        } catch (JSONException e) {
+                                                            Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }
+                                                });
+                                            }
                                         }
+                                    } catch (JSONException e) {
+                                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                                     }
+                                    court.notifyDataSetChanged();
                                 }
-                            }
-                            catch (JSONException ignored){
-                            }
-                            court.notifyDataSetChanged();
-                        }
 
-                        @Override
-                        public void onError(String error) {
+                                @Override
+                                public void onError(String error) {
+                                    Toast.makeText(MainActivity.this, "伺服器出錯啦><\n" + error, Toast.LENGTH_SHORT).show();
+                                }
+                            }, courtDate);
+                        } else {
+                            spinner3.setVisibility(GONE);
+                            tv_choseCourt.setVisibility(GONE);
+                            httpRequest.postCourt(new HttpRequest.VolleyCallback() {
+                                @Override
+                                public void onSuccess(String label, String result) {
+                                    try {
+                                        JSONArray jsonArray = new JSONArray(result);
+                                        for (int i = 0; i < jsonArray.length(); i++) {
+                                            JSONObject temp = jsonArray.getJSONObject(i);
+                                            if (temp.getString("name").equals(parent.getSelectedItem().toString())) {
+                                                if (!parent.getSelectedItem().toString().equals("桌球教室")) {
+                                                    JSONArray state = temp.getJSONArray("state");
+                                                    for (int j = 0; j < 7; j++) {
+                                                        String info = month + "/" + courseTableView.getOneWeekDatesOfMonth()[j] + "\n\t";
+                                                        if (state.getString(j).equals(""))
+                                                            court_data.add(info + "////////無借用資訊////////");
+                                                        else
+                                                            court_data.add(info + state.getString(j));
+                                                    }
+                                                } else {
+                                                    JSONArray state = temp.getJSONArray("state").getJSONObject(0).getJSONArray("state");
+                                                    for (int j = 0; j < 7; j++) {
+                                                        String info = month + "/" + courseTableView.getOneWeekDatesOfMonth()[j] + "\n\t";
+                                                        if (state.getString(j).equals(""))
+                                                            court_data.add(info + "////////無借用資訊////////");
+                                                        else
+                                                            court_data.add(info + state.getString(j));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } catch (JSONException e) {
+                                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                    court.notifyDataSetChanged();
+                                }
 
+                                @Override
+                                public void onError(String error) {
+                                    Toast.makeText(MainActivity.this, "伺服器出錯啦><\n" + error, Toast.LENGTH_SHORT).show();
+                                }
+                            }, courtDate);
                         }
-                    },courtDate);
+                        Toast.makeText(MainActivity.this, "選了" + courtType, Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 }
 
                 @Override
                 public void onNothingSelected(final AdapterView<?> parent) {
-                    Toast.makeText(MainActivity.this, "預設" + parent.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
-                    httpRequest.postCourt(new HttpRequest.VolleyCallback() {
-                        @Override
-                        public void onSuccess(String label, String result) {
-                            try {
-                                court_data.clear();
-                                JSONArray jsonArray = new JSONArray(result);
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    JSONObject temp = jsonArray.getJSONObject(i);
-                                    if(temp.getString("name").equals(parent.getSelectedItem().toString()))
-                                    {
-                                        JSONArray state = temp.getJSONArray("state");
-                                        for (int j = 0; j < 7; j++) {
-                                            String info = month + "/" + courseTableView.getOneWeekDatesOfMonth()[j] + "\n\t";
-                                            if(state.getString(j).equals(""))
-                                                court_data.add(info + "////////無借用資訊////////");
-                                            else
-                                                court_data.add(info + state.getString(j));
+                    String courtType = parent.getSelectedItem().toString();
+                    try {
+                        court_data.clear();
+                        if (courtType.matches("排球場|籃球場|網球場|綜合球場|羽球場|視聽教室")) {
+                            spinner3.setVisibility(VISIBLE);
+                            tv_choseCourt.setVisibility(VISIBLE);
+                            httpRequest.postCourt(new HttpRequest.VolleyCallback() {
+                                @Override
+                                public void onSuccess(String label, String result) {
+                                    try {
+                                        JSONArray jsonArray = new JSONArray(result);
+                                        for (int i = 0; i < jsonArray.length(); i++) {
+                                            JSONObject temp = jsonArray.getJSONObject(i);
+                                            if (temp.getString("name").equals(parent.getSelectedItem().toString())) {
+                                                final JSONArray state = temp.getJSONArray("state");
+                                                final List<String> multiCourt = new ArrayList<>();
+                                                for (int j = 0; j < state.length(); j++) {
+                                                    String innerCourt = state.getJSONObject(j).getString("court");
+                                                    multiCourt.add(innerCourt);
+                                                }
+                                                ArrayAdapter<String> sp3 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, multiCourt);
+                                                spinner3.setAdapter(sp3);
+                                                spinner3.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                                    @Override
+                                                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                                        court_data.clear();
+                                                        String seleCourt = parent.getSelectedItem().toString();
+                                                        try {
+                                                            for (int x = 0; x < state.length(); x++) {
+                                                                if (state.getJSONObject(x).getString("court").equals(seleCourt)) {
+                                                                    JSONArray innerState = state.getJSONObject(x).getJSONArray("state");
+                                                                    for (int j = 0; j < 7; j++) {
+                                                                        String info = month + "/" + courseTableView.getOneWeekDatesOfMonth()[j] + "\n\t";
+                                                                        if (innerState.getString(j).equals(""))
+                                                                            court_data.add(info + "////////無借用資訊////////");
+                                                                        else
+                                                                            court_data.add(info + innerState.getString(j));
+                                                                    }
+                                                                    court.notifyDataSetChanged();
+                                                                }
+                                                            }
+                                                        } catch (JSONException e) {
+                                                            Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onNothingSelected(AdapterView<?> parent) {
+                                                        court_data.clear();
+                                                        String seleCourt = parent.getSelectedItem().toString();
+                                                        try {
+                                                            for (int x = 0; x < state.length(); x++) {
+                                                                if (state.getJSONObject(x).getString("court").equals(seleCourt)) {
+                                                                    JSONArray innerState = state.getJSONObject(x).getJSONArray("state");
+                                                                    for (int j = 0; j < 7; j++) {
+                                                                        String info = month + "/" + courseTableView.getOneWeekDatesOfMonth()[j] + "\n\t";
+                                                                        if (innerState.getString(j).equals(""))
+                                                                            court_data.add(info + "////////無借用資訊////////");
+                                                                        else
+                                                                            court_data.add(info + innerState.getString(j));
+                                                                    }
+                                                                    court.notifyDataSetChanged();
+                                                                }
+                                                            }
+                                                        } catch (JSONException e) {
+                                                            Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }
+                                                });
+                                            }
                                         }
+                                    } catch (JSONException e) {
+                                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                                     }
+                                    court.notifyDataSetChanged();
                                 }
-                            }
-                            catch (JSONException ignored){
-                            }
-                            court.notifyDataSetChanged();
-                        }
 
-                        @Override
-                        public void onError(String error) {
+                                @Override
+                                public void onError(String error) {
+                                    Toast.makeText(MainActivity.this, "伺服器出錯啦><\n" + error, Toast.LENGTH_SHORT).show();
+                                }
+                            }, courtDate);
+                        } else {
+                            spinner3.setVisibility(GONE);
+                            tv_choseCourt.setVisibility(GONE);
+                            httpRequest.postCourt(new HttpRequest.VolleyCallback() {
+                                @Override
+                                public void onSuccess(String label, String result) {
+                                    try {
+                                        JSONArray jsonArray = new JSONArray(result);
+                                        for (int i = 0; i < jsonArray.length(); i++) {
+                                            JSONObject temp = jsonArray.getJSONObject(i);
+                                            if (temp.getString("name").equals(parent.getSelectedItem().toString())) {
+                                                if (!parent.getSelectedItem().toString().equals("桌球教室")) {
+                                                    JSONArray state = temp.getJSONArray("state");
+                                                    for (int j = 0; j < 7; j++) {
+                                                        String info = month + "/" + courseTableView.getOneWeekDatesOfMonth()[j] + "\n\t";
+                                                        if (state.getString(j).equals(""))
+                                                            court_data.add(info + "////////無借用資訊////////");
+                                                        else
+                                                            court_data.add(info + state.getString(j));
+                                                    }
+                                                } else {
+                                                    JSONArray state = temp.getJSONArray("state").getJSONObject(0).getJSONArray("state");
+                                                    for (int j = 0; j < 7; j++) {
+                                                        String info = month + "/" + courseTableView.getOneWeekDatesOfMonth()[j] + "\n\t";
+                                                        if (state.getString(j).equals(""))
+                                                            court_data.add(info + "////////無借用資訊////////");
+                                                        else
+                                                            court_data.add(info + state.getString(j));
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } catch (JSONException e) {
+                                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                    court.notifyDataSetChanged();
+                                }
 
+                                @Override
+                                public void onError(String error) {
+                                    Toast.makeText(MainActivity.this, "伺服器出錯啦><\n" + error, Toast.LENGTH_SHORT).show();
+                                }
+                            }, courtDate);
                         }
-                    },courtDate);
+                        Toast.makeText(MainActivity.this, "預設" + courtType, Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
             addView(view);
         }
     }
-    public class PageFiveView extends PageView{
+
+    public class PageFiveView extends PageView {
         public PageFiveView(Context context) {
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.tab_5, null);
             RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.reyview);
-            LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this,LinearLayoutManager.HORIZONTAL,false);
+            LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false);
             recyclerView.setLayoutManager(layoutManager);
             List<String> list = new ArrayList<>();
             list.add("校園版");
@@ -599,7 +846,7 @@ public class MainActivity extends AppCompatActivity
             list.add("升學版");
             list.add("3C版");
             list.add("社團版");
-            TopicChatAdapter topicChatAdapter = new TopicChatAdapter(list,MainActivity.this);
+            TopicChatAdapter topicChatAdapter = new TopicChatAdapter(list, MainActivity.this);
             recyclerView.setAdapter(topicChatAdapter);
             List<String> courseList = new ArrayList<>();
             for (int i = 0; i < userCourseList.size(); i++) {
@@ -617,23 +864,24 @@ public class MainActivity extends AppCompatActivity
                     int index = 0;
                     for (int i = 0; i < userCourseList.size(); i++) {
                         String temp = userCourseList.get(i).getname();
-                        if(name.equals(temp))
+                        if (name.equals(temp))
                             index = i;
                     }
-                    chatSocket.connect("yuntech_" +  userCourseList.get(index).getserial() , Build.SERIAL);
+                    chatSocket.connect("yuntech_" + userCourseList.get(index).getserial(), Build.SERIAL);
                     Intent intent = new Intent();
                     Bundle bundle = new Bundle();
-                    bundle.putString("roomID",userCourseList.get(index).getserial() + " " + userCourseList.get(index).getname());
+                    bundle.putString("roomID", userCourseList.get(index).getserial() + " " + userCourseList.get(index).getname());
                     bundle.putString("username", Build.SERIAL);
                     intent.putExtras(bundle);
-                    intent.setClass(MainActivity.this,ChatActivity.class);
+                    intent.setClass(MainActivity.this, ChatActivity.class);
                     startActivity(intent);
                 }
             });
             addView(view);
         }
     }
-    public class PersonalOneView extends PageView{
+
+    public class PersonalOneView extends PageView {
         public PersonalOneView(Context context) {
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.personal1, null);
@@ -643,23 +891,23 @@ public class MainActivity extends AppCompatActivity
                 String serial = userCourseList.get(i).getserial();
                 String name = userCourseList.get(i).getname();
                 String teather = userCourseList.get(i).getteacher();
-                p1List.add(serial+" "+name);
+                p1List.add(serial + " " + name);
             }
 
-            ListView person1 = (ListView)view.findViewById(R.id.lvPerson1);
+            ListView person1 = (ListView) view.findViewById(R.id.lvPerson1);
 
-            ArrayAdapter p1 = new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,p1List);
+            ArrayAdapter p1 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, p1List);
 
             person1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                   // Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+ userCourseList.get(position).getserial()+ userCourseList.get(position).getname(),Toast.LENGTH_SHORT).show();
-                    String serial = userCourseList.get(position).getserial().toString();
-                    String name = userCourseList.get(position).getname().toString();
+                    // Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+ userCourseList.get(position).getserial()+ userCourseList.get(position).getname(),Toast.LENGTH_SHORT).show();
+                    String serial = userCourseList.get(position).getserial();
+                    String name = userCourseList.get(position).getname();
                     Bundle bundle = new Bundle();
-                    bundle.putString("serial",serial);
-                    bundle.putString("name",name);
-                    Intent intent = new Intent(MainActivity.this,PersonalNoteList.class);
+                    bundle.putString("serial", serial);
+                    bundle.putString("name", name);
+                    Intent intent = new Intent(MainActivity.this, PersonalNoteList.class);
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }
@@ -668,7 +916,8 @@ public class MainActivity extends AppCompatActivity
             addView(view);
         }
     }
-    public class PersonalTwoView extends PageView{
+
+    public class PersonalTwoView extends PageView {
         public PersonalTwoView(Context context) {
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.personal2, null);
@@ -677,20 +926,20 @@ public class MainActivity extends AppCompatActivity
                 String serial = userCourseList.get(i).getserial();
                 String name = userCourseList.get(i).getname();
                 String teather = userCourseList.get(i).getteacher();
-                p2List.add(serial+" "+name);
+                p2List.add(serial + " " + name);
             }
 
-            ListView person2 = (ListView)view.findViewById(R.id.lvPerson2);
-            ArrayAdapter p2 = new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_list_item_1,p2List);
+            ListView person2 = (ListView) view.findViewById(R.id.lvPerson2);
+            ArrayAdapter p2 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, p2List);
 
             person2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(MainActivity.this,"點擊第"+(position+1)+"個item\n"+ userCourseList.get(position).getserial()+ userCourseList.get(position).getname(),Toast.LENGTH_SHORT).show();
-                    String serial = userCourseList.get(position).getserial().toString();
+                    Toast.makeText(MainActivity.this, "點擊第" + (position + 1) + "個item\n" + userCourseList.get(position).getserial() + userCourseList.get(position).getname(), Toast.LENGTH_SHORT).show();
+                    String serial = userCourseList.get(position).getserial();
                     Bundle bundle = new Bundle();
-                    bundle.putString("serial",serial);
-                    Intent intent = new Intent(MainActivity.this,SharedNotelist.class);
+                    bundle.putString("serial", serial);
+                    Intent intent = new Intent(MainActivity.this, SharedNotelist.class);
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }
@@ -700,16 +949,17 @@ public class MainActivity extends AppCompatActivity
             addView(view);
         }
     }
-//////////
+
+    //////////
     //rabbit
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        LatLng yuntech = new LatLng(23.6951701,120.5337975);
+        LatLng yuntech = new LatLng(23.6951701, 120.5337975);
         addArea();
         //init_marker();
         singleMarker = null;
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         mMap.setOnMarkerClickListener(this);
@@ -724,37 +974,40 @@ public class MainActivity extends AppCompatActivity
         mMap.setOnInfoWindowLongClickListener(new GoogleMap.OnInfoWindowLongClickListener() {
             @Override
             public void onInfoWindowLongClick(Marker marker) {
-                Toast.makeText(MainActivity.this,marker.getTitle() + " 長按",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, marker.getTitle() + " 長按", Toast.LENGTH_SHORT).show();
             }
         });
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                Toast.makeText(MainActivity.this,marker.getTitle() + " 點擊",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, marker.getTitle() + " 點擊", Toast.LENGTH_SHORT).show();
                 ClickInfoWondows(marker.getPosition());
             }
         });
     }
+
     @Override
     public boolean onMarkerClick(final Marker marker) {
-        if(singleMarker == null) {
-            Animation fadein = AnimationUtils.loadAnimation(this,R.anim.fade_in);
+        if (singleMarker == null) {
+            Animation fadein = AnimationUtils.loadAnimation(this, R.anim.fade_in);
             bt_navigation.startAnimation(fadein);
         }
         singleMarker = marker;
         String tag = marker.getTag().toString();
-        Toast.makeText(MainActivity.this, tag , Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, tag, Toast.LENGTH_SHORT).show();
         return false;
     }
+
     @Override
     public void onMapClick(LatLng latLng) {
-        if(null != singleMarker) {
-            Toast.makeText(MainActivity.this,singleMarker.getTitle(),Toast.LENGTH_SHORT).show();
-            Animation fadeout = AnimationUtils.loadAnimation(this,R.anim.fade_out);
+        if (null != singleMarker) {
+            Toast.makeText(MainActivity.this, singleMarker.getTitle(), Toast.LENGTH_SHORT).show();
+            Animation fadeout = AnimationUtils.loadAnimation(this, R.anim.fade_out);
             bt_navigation.startAnimation(fadeout);
         }
         singleMarker = null;
     }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // 判斷是否按下Back
@@ -790,15 +1043,15 @@ public class MainActivity extends AppCompatActivity
         super.onStop();
     }
 
-    public void storeCourse(){
+    public void storeCourse() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < userCourseList.size(); i++) {
             String serial = userCourseList.get(i).getserial();
             String classfor = userCourseList.get(i).getclass_for();
-            if(serial != null || classfor != null)
+            if (serial != null || classfor != null)
                 sb.append(serial).append(",").append(classfor).append(",");
         }
-        settings.edit().putString(courseData,sb.toString()).apply();
+        settings.edit().putString(courseData, sb.toString()).apply();
     }
 
     public void rabbit() {
@@ -819,12 +1072,13 @@ public class MainActivity extends AppCompatActivity
 
         //建立Request物件
         chatSocket = new ChatSocket(socketCallback);
-        boolean courseReady = settings.getBoolean(isCourseDataReady,false);
-        if(!checkCourseData() || !courseReady){
+        boolean courseReady = settings.getBoolean(isCourseDataReady, false);
+        if (!checkCourseData() || !courseReady) {
             downloadCourse();
         }
     }
-    private void downloadCourse(){
+
+    private void downloadCourse() {
         final boolean[] check = {false};
         new AlertDialog.Builder(MainActivity.this) //宣告對話框物件，並顯示課程資料
                 .setTitle("初次使用")
@@ -840,49 +1094,51 @@ public class MainActivity extends AppCompatActivity
                         check[0] = true;
                         //使用方法取課表
                         httpRequest.getCourse(callback);
-                        proDialog = ProgressDialog.show(MainActivity.this,"請稍候", "正在為您下載課程資料...",true);
+                        proDialog = ProgressDialog.show(MainActivity.this, "請稍候", "正在為您下載課程資料...", true);
                     }
                 })
                 .setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
-                        if(!check[0]){
-                            Toast.makeText(MainActivity.this,"無課程資料將使部分功能無法使用",Toast.LENGTH_SHORT).show();
+                        if (!check[0]) {
+                            Toast.makeText(MainActivity.this, "無課程資料將使部分功能無法使用", Toast.LENGTH_SHORT).show();
                         }
                     }
                 }).show();
     }
+
     private boolean checkCourseData() {
         SQLiteDatabase checkDB;
         try {
             checkDB = SQLiteDatabase.openDatabase(getFilesDir() + "class_database.db", null,
                     SQLiteDatabase.OPEN_READONLY);
             checkDB.close();
-            Log.e("database","db exsist");
+            Log.e("database", "db exsist");
         } catch (SQLiteException e) {
-            Log.e("database",e.getMessage());
+            Log.e("database", e.getMessage());
             return false;
         }
         return true;
     }
+
     private void analysis_course(String course_data) {
         ArrayList<Course> courseArray = new ArrayList<>();
         try {
             JSONArray array = new JSONArray(course_data);
-            String index[] = {"empty","W","X","A","B","C","D","Y","E","F","G","H","Z","I"};
+            String index[] = {"empty", "W", "X", "A", "B", "C", "D", "Y", "E", "F", "G", "H", "Z", "I"};
             for (int i = 0; i < array.length(); i++) {
                 String serial = array.getJSONObject(i).optString("serial");
                 String name = array.getJSONObject(i).optString("name");
                 String schedule = array.getJSONObject(i).optString("schedule");
                 int schedule_index = 0;
-                if(!schedule.equals("")){
-                    schedule_index = Arrays.asList(index).indexOf(schedule.substring(0,1));
+                if (!schedule.equals("")) {
+                    schedule_index = Arrays.asList(index).indexOf(schedule.substring(0, 1));
                 }
                 String room = array.getJSONObject(i).optString("room");
                 String teacher = array.getJSONObject(i).optString("teacher");
                 String day = array.getJSONObject(i).optString("day");
                 int day_index = 0;
-                if(!day.equals("")){
+                if (!day.equals("")) {
                     day_index = Integer.parseInt(day);
                 }
                 int spanNum = array.getJSONObject(i).optInt("class_span");
@@ -907,14 +1163,15 @@ public class MainActivity extends AppCompatActivity
                         .setrequire_eng(require_eng);
                 courseArray.add(course);
             }
-            Log.d("Course","OK");
+            Log.d("Course", "OK");
             createCourseDatabase(courseArray);
         } catch (JSONException e) {
             proDialog.dismiss();
-            Toast.makeText(MainActivity.this,"課程資料分析出錯QQ",Toast.LENGTH_SHORT).show();
-            Log.e("analysis_course",e.getMessage());
+            Toast.makeText(MainActivity.this, "課程資料分析出錯QQ", Toast.LENGTH_SHORT).show();
+            Log.e("analysis_course", e.getMessage());
         }
     }
+
     public void createCourseDatabase(ArrayList<Course> data) {
         SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(getFilesDir() + "class_database.db", null);
         try {
@@ -954,15 +1211,15 @@ public class MainActivity extends AppCompatActivity
                                 obj.getschedule_display()});
             }
             proDialog.dismiss();
-            settings.edit().putBoolean(isCourseDataReady,true).apply();
+            settings.edit().putBoolean(isCourseDataReady, true).apply();
             Log.d("course", "data create suceess");
-        }
-        catch (SQLiteException e){
+        } catch (SQLiteException e) {
             proDialog.dismiss();
             Log.d("SQLite", "資料庫建立出錯....");
         }
 
     }
+
     private void addArea() {
         PolygonOptions polygonOptions;
         for (String key : mapArea.keySet()) {
@@ -1019,7 +1276,8 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
-    private void init_marker(){
+
+    private void init_marker() {
         latlng = new LatLng(23.695210, 120.536921);
         icon = BitmapDescriptorFactory.fromResource(R.mipmap.marker_college);
         singleMarker = mMap.addMarker(new MarkerOptions()
@@ -1077,12 +1335,14 @@ public class MainActivity extends AppCompatActivity
         mMarkers.add(singleMarker);
 
     }
+
     public class MyInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
         @Override
         public View getInfoWindow(Marker marker) {
             return null;
         }
+
         @Override
         public View getInfoContents(Marker marker) {
             // 依指定layout檔，建立地標訊息視窗View物件
@@ -1093,7 +1353,7 @@ public class MainActivity extends AppCompatActivity
             title.setText(marker.getTitle());
             // 顯示地標snippet
             String floorinfo = marker.getSnippet();
-            if( floorinfo != null) {
+            if (floorinfo != null) {
                 ListView lvSnippet = ((ListView) infoWindow.findViewById(R.id.lvFloor));
                 adFloor = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1);
                 lvSnippet.setAdapter(adFloor);
@@ -1120,14 +1380,12 @@ public class MainActivity extends AppCompatActivity
                 try {
                     test = jObject.getJSONArray("department").getJSONObject(4).getJSONArray("floor").toString();
                     JSONArray parsefloor = new JSONArray(test);
-                    for(int j = 0;j<parsefloor.length();j++)
-                    {
+                    for (int j = 0; j < parsefloor.length(); j++) {
                         String floor_lv_string = "";
                         String floor_num = parsefloor.getJSONObject(j).getString("floor_num");
                         floor_lv_string += floor_num;
                         JSONArray floor_class = new JSONArray(parsefloor.getJSONObject(j).getJSONArray("classroom").toString());
-                        for(int k = 0;k<floor_class.length();k++)
-                        {
+                        for (int k = 0; k < floor_class.length(); k++) {
                             String get_class_number = floor_class.getJSONObject(k).getString("number");
                             String get_class_type = floor_class.getJSONObject(k).getString("type");
                             floor_lv_string += "\n" + get_class_number + " " + get_class_type;
@@ -1142,7 +1400,8 @@ public class MainActivity extends AppCompatActivity
             }
         }
     }
-    private void ClickInfoWondows(final LatLng latlng){
+
+    private void ClickInfoWondows(final LatLng latlng) {
         LayoutInflater inflater = LayoutInflater.from(MainActivity.this); //LayoutInflater的目的是將自己設計xml的Layout轉成View
         final View view = inflater.inflate(R.layout.long_click_infowindows_dialog, null); //指定要給View表述的Layout
         ArrayList<String> function = new ArrayList<>();
@@ -1161,6 +1420,7 @@ public class MainActivity extends AppCompatActivity
                 })
                 .show();
     }
+
     private void startDropMarkerAnimation(final Marker marker) {
         final LatLng target = marker.getPosition();
         final Handler handler = new Handler();
@@ -1187,8 +1447,9 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-    public void check_permission(){
-        int location = ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+
+    public void check_permission() {
+        int location = ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION);
         if (location != PackageManager.PERMISSION_GRANTED) { //檢查是否有權限
             ActivityCompat.requestPermissions( //如果沒有就跟使用者要求
                     MainActivity.this,
@@ -1196,17 +1457,20 @@ public class MainActivity extends AppCompatActivity
             );
         }
     }
-    public void checkGPS(){
-        if(!isGPSEnabled(this)) {
+
+    public void checkGPS() {
+        if (!isGPSEnabled(this)) {
             Toast.makeText(MainActivity.this, "請開始定位功能避免定位失效", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             startActivity(intent);
         }
     }
-    public static boolean isGPSEnabled(Context context){
-        LocationManager locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+
+    public static boolean isGPSEnabled(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
+
     Timer timerExit = new Timer();
     TimerTask task = new TimerTask() {
         @Override
@@ -1218,7 +1482,7 @@ public class MainActivity extends AppCompatActivity
     public HttpRequest.VolleyCallback callback = new HttpRequest.VolleyCallback() {
         @Override
         public void onSuccess(String label, String result) {
-            switch (label){
+            switch (label) {
                 case "course":
                     analysis_course(result);
                     break;
@@ -1228,21 +1492,22 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onError(String error) {
             proDialog.dismiss();
-            Toast.makeText(MainActivity.this,"伺服器出錯啦><",Toast.LENGTH_SHORT).show();
-            Log.d("Volley",error);
+            Toast.makeText(MainActivity.this, "伺服器出錯啦><\n" + error, Toast.LENGTH_SHORT).show();
+            Log.d("Volley", error);
         }
     };
     public ChatSocket.SocketCallback socketCallback = new ChatSocket.SocketCallback() {
         @Override
         public void onReceived(String result) {
-            Log.d("Socket_Activity",result);
+            Log.d("Socket_Activity", result);
         }
 
         @Override
         public void onError(Exception err) {
-            Log.d("Socket_Err_Activity",err.getMessage());
+            Log.d("Socket_Err_Activity", err.getMessage());
         }
     };
+
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
