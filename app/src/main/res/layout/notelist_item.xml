@@ -24,6 +24,7 @@
             android:layout_height="match_parent"
             android:background="@drawable/course_info_yellow"
             android:gravity="center"
+            android:text="未共用"
              />
 
         <TextView

@@ -24,7 +24,8 @@ public class NoteDateBaseHelper extends SQLiteOpenHelper {
                 + "serial text ,"
                 + "title text,"
                 + "content text , "
-                + "date text)";
+                + "date text ,"
+                +"state text)";
         db.execSQL(CreateNote);
     }
 

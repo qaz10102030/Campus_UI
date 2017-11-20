@@ -30,16 +30,12 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     public String last_content,last_title;//用来獲取edittext内容
     private String serial;
     private int arg0;
-    private SharedPreferences Notesetting ;//手機的memery;
-    private static final String note_data = "DATA";
-    private static final String note_state ="Note_State";//欄位名稱
 
     private HttpRequest httpRequest;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_note_activity);
         InitView();
-        Notesetting= getSharedPreferences(note_data,0);
         httpRequest = new HttpRequest(AddNoteActivity.this);
     }
 
@@ -91,13 +87,15 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                         Date date = new Date();
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                         String dateString = sdf.format(date);
+                        boolean state = false;
+                        String stateString = String.valueOf(state);
                         // 向資料庫新增資料
                         ContentValues values = new ContentValues();
                         values.put("title", title);
                         values.put("content", content);
                         values.put("date", dateString);
                         values.put("serial",serial);
-
+                        values.put("state",stateString);
                         db.insert("note", null, values);
                         finish();
                     }
@@ -110,7 +108,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                     values.put("content", content);
                     values.put("title", title);
 
-                    if(Notesetting.getBoolean(note_state+arg0,false))
+                  /*  if()
                     {
                         httpRequest.modifyNote(new HttpRequest.VolleyCallback() {
                             @Override
@@ -122,7 +120,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                                 Toast.makeText(AddNoteActivity.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
                               }
                         },serial,last_title,last_content,title,content,2);
-                    }
+                    }*/
                     db.update("note", values, "content =? and title = ?", new String[]{last_content,last_title});
                     finish();
                 }

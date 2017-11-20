@@ -1,5 +1,6 @@
 package net.kaijie.campus_ui;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.app.AlertDialog.Builder;
@@ -50,11 +51,9 @@ public class PersonalNoteList extends AppCompatActivity implements
     private SQLiteDatabase DB;
     private Set<SwipeListLayout> sets = new HashSet();
 
-    private SharedPreferences Notesetting ;//手機的memery;
-    private static final String note_data = "DATA";
-    private static final String note_state ="Note_State";//欄位名稱
     private String serial;
     private String name;
+
 
     private HttpRequest httpRequest;
     @Override
@@ -67,7 +66,7 @@ public class PersonalNoteList extends AppCompatActivity implements
 
         Toast.makeText(PersonalNoteList.this,""+serial+name,Toast.LENGTH_SHORT).show();
         InitView();
-        Notesetting= getSharedPreferences(note_data,0);
+
 
         httpRequest = new HttpRequest(PersonalNoteList.this);
 
@@ -146,22 +145,28 @@ public class PersonalNoteList extends AppCompatActivity implements
             tv_title.setText(list_adapter.get(arg0).get(0));
             tv_content.setText(list_adapter.get(arg0).get(1));
             tv_date.setText(list_adapter.get(arg0).get(2));
+            final String content = list_adapter.get(arg0).get(1);
+            final String title = list_adapter.get(arg0).get(0);
+            final boolean state = Boolean.valueOf(list_adapter.get(arg0).get(3));
             sll_main.setOnSwipeStatusListener(new MyOnSlipStatusListener(sll_main));
-            if(Notesetting.getBoolean(note_state+arg0,false)){
+            if(state){
                 tv_shared.setText("已共用");
-            }else {
-                tv_shared.setText("共用");
+            }
+            else {
+                tv_shared.setText("未共用");
             }
             tv_shared.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     sll_main.setStatus(SwipeListLayout.Status.Close, true);
-                    boolean temp = Notesetting.getBoolean(note_state+arg0,false);
+
                  //   Toast.makeText(PersonalNoteList.this,"共用",Toast.LENGTH_SHORT).show();
 
-                    if(!temp) {
-                        tv_shared.setText("已共用");
-                        Notesetting.edit().putBoolean(note_state+arg0,true).apply();
+                    ContentValues values = new ContentValues();
+
+                   if(!state) {
+                        values.put("state",true+"");
+                        DB.update("note",values,"serial = ? and title= ? and content = ? ",new String[]{serial,title,content});
                         httpRequest.postNote(new HttpRequest.VolleyCallback() {
                             @Override
                             public void onSuccess(String label, String result) {
@@ -172,12 +177,12 @@ public class PersonalNoteList extends AppCompatActivity implements
                                 Toast.makeText(PersonalNoteList.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
                             }
                         },serial,tv_title.getText().toString(),tv_content.getText().toString(),1);
-                    }
+                      RefreshNotesList();
+                   }
                     else {
-
-                        tv_shared.setText("共用");
-                        Notesetting.edit().putBoolean(note_state+arg0,false).apply();
-                        httpRequest.postNote(new HttpRequest.VolleyCallback() {
+                       values.put("state",false+"");
+                       DB.update("note",values,"serial = ? and title= ? and content = ? ",new String[]{serial,title,content});
+                       httpRequest.postNote(new HttpRequest.VolleyCallback() {
                             @Override
                             public void onSuccess(String label, String result) {
                                 Toast.makeText(PersonalNoteList.this,"上傳成功\n"+result,Toast.LENGTH_SHORT).show();
@@ -186,7 +191,8 @@ public class PersonalNoteList extends AppCompatActivity implements
                             public void onError(String error) {
                                 Toast.makeText(PersonalNoteList.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
                             }
-                        },serial,tv_title.getText().toString(),tv_content.getText().toString(),0);
+                        },serial,tv_title.getText().toString(),tv_content.getText().toString(),3);
+                       RefreshNotesList();
                     }
                     notifyDataSetChanged();
                 }
@@ -203,9 +209,8 @@ public class PersonalNoteList extends AppCompatActivity implements
                             .setPositiveButton("確定", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    String content = list_adapter.get(arg0).get(1);
-                                    Notesetting.edit().putBoolean(note_state+arg0,false).apply();
-                                    DB.delete("note", "content = ?", new String[]{content});
+
+                                    DB.delete("note", "serial = ? and title= ? and content = ? ", new String[]{serial,title,content});
 
                                     httpRequest.postNote(new HttpRequest.VolleyCallback() {
                                         @Override
@@ -320,10 +325,12 @@ public class PersonalNoteList extends AppCompatActivity implements
             String title = cursor.getString(cursor.getColumnIndex("title"));
             String name = cursor.getString(cursor.getColumnIndex("content"));
             String date = cursor.getString(cursor.getColumnIndex("date"));
+            String stateString = cursor.getString(cursor.getColumnIndex("state"));
             List<String> str= new ArrayList<>();
             str.add(title);
             str.add(name);
             str.add(date);
+            str.add(stateString);
             dataList.add(str);
 
         }
