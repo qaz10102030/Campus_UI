@@ -30,6 +30,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     public int enter_state = 0;//用来区分是新建一个note还是更改原来的note
     public String last_content,last_title;//用来獲取edittext内容
     private String serial;
+    private boolean state;
     private int arg0;
 
     private HttpRequest httpRequest;
@@ -65,6 +66,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         enter_state = myBundle.getInt("enter_state");
         serial=myBundle.getString("serial");
         arg0 = myBundle.getInt("arg0");
+        state = myBundle.getBoolean("state");
         et_content.setText(last_content);
         et_title.setText(last_title);
         btn_cancel.setOnClickListener(this);
@@ -109,7 +111,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                     values.put("content", content);
                     values.put("title", title);
 
-                  /*  if()
+                   if(state)
                     {
                         httpRequest.modifyNote(new HttpRequest.VolleyCallback() {
                             @Override
@@ -126,7 +128,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
 
                             }
                         },serial,last_title,last_content,title,content,2);
-                    }*/
+                    }
                     db.update("note", values, "content =? and title = ?", new String[]{last_content,last_title});
                     finish();
                 }

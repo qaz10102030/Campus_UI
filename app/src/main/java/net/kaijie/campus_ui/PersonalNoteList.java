@@ -197,17 +197,13 @@ public class PersonalNoteList extends AppCompatActivity implements
                             public void onError(String error) {
                                 Toast.makeText(PersonalNoteList.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
                             }
-<<<<<<< Updated upstream
+                           @Override
+                           public void onImageSuccess(String label, Bitmap result) {
+
+                           }
                         },serial,tv_title.getText().toString(),tv_content.getText().toString(),3);
                        RefreshNotesList();
-=======
 
-                            @Override
-                            public void onImageSuccess(String label, Bitmap result) {
-
-                            }
-                        },serial,tv_title.getText().toString(),tv_content.getText().toString(),0);
->>>>>>> Stashed changes
                     }
                     notifyDataSetChanged();
                 }
@@ -263,16 +259,16 @@ public class PersonalNoteList extends AppCompatActivity implements
                 public void onClick(View view) {
                     sll_main.setStatus(SwipeListLayout.Status.Close, true);
                     Toast.makeText(PersonalNoteList.this,"修改",Toast.LENGTH_SHORT).show();
-                    String content = list_adapter.get(arg0).get(1);
-                    String title1 = list_adapter.get(arg0).get(0);
+
 
                     Intent myIntent = new Intent(PersonalNoteList.this, AddNoteActivity.class);
                     Bundle bundle = new Bundle();
-                    bundle.putString("title",title1 );
+                    bundle.putString("title",title );
                     bundle.putString("info", content);
                     bundle.putInt("enter_state", 1);
                     bundle.putString("serial",serial);
                     bundle.putInt("arg0",arg0);
+                    bundle.putBoolean("state",state);
                     myIntent.putExtras(bundle);
                     startActivityForResult(myIntent,1);
                     notifyDataSetChanged();
