@@ -112,9 +112,11 @@ public class PersonalNoteList extends AppCompatActivity implements
 
     class ListAdapter extends BaseAdapter {
         List<List<String>> list_adapter;
-        public ListAdapter(List<List<String>> list_adapter){
-            this.list_adapter=list_adapter;
+
+        public ListAdapter(List<List<String>> list_adapter) {
+            this.list_adapter = list_adapter;
         }
+
         @Override
         public int getCount() {
             return list_adapter.size();
@@ -150,10 +152,9 @@ public class PersonalNoteList extends AppCompatActivity implements
             final String title = list_adapter.get(arg0).get(0);
             final boolean state = Boolean.valueOf(list_adapter.get(arg0).get(3));
             sll_main.setOnSwipeStatusListener(new MyOnSlipStatusListener(sll_main));
-            if(state){
+            if (state) {
                 tv_shared.setText("已共用");
-            }
-            else {
+            } else {
                 tv_shared.setText("未共用");
             }
             tv_shared.setOnClickListener(new OnClickListener() {
@@ -161,49 +162,50 @@ public class PersonalNoteList extends AppCompatActivity implements
                 public void onClick(View view) {
                     sll_main.setStatus(SwipeListLayout.Status.Close, true);
 
-                 //   Toast.makeText(PersonalNoteList.this,"共用",Toast.LENGTH_SHORT).show();
+                    //   Toast.makeText(PersonalNoteList.this,"共用",Toast.LENGTH_SHORT).show();
 
                     ContentValues values = new ContentValues();
 
-                   if(!state) {
-                        values.put("state",true+"");
-                        DB.update("note",values,"serial = ? and title= ? and content = ? ",new String[]{serial,title,content});
+                    if (!state) {
+                        values.put("state", true + "");
+                        DB.update("note", values, "serial = ? and title= ? and content = ? ", new String[]{serial, title, content});
                         httpRequest.postNote(new HttpRequest.VolleyCallback() {
                             @Override
                             public void onSuccess(String label, String result) {
-                                Toast.makeText(PersonalNoteList.this,"上傳成功\n"+result,Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PersonalNoteList.this, "上傳成功\n" + result, Toast.LENGTH_SHORT).show();
                             }
+
                             @Override
                             public void onError(String error) {
-                                Toast.makeText(PersonalNoteList.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PersonalNoteList.this, "上傳失敗\n" + error, Toast.LENGTH_SHORT).show();
                             }
 
                             @Override
                             public void onImageSuccess(String label, Bitmap result) {
 
                             }
-                        },serial,tv_title.getText().toString(),tv_content.getText().toString(),1);
-                      RefreshNotesList();
-                   }
-                    else {
-                       values.put("state",false+"");
-                       DB.update("note",values,"serial = ? and title= ? and content = ? ",new String[]{serial,title,content});
-                       httpRequest.postNote(new HttpRequest.VolleyCallback() {
+                        }, serial, tv_title.getText().toString(), tv_content.getText().toString(), 1);
+                        RefreshNotesList();
+                    } else {
+                        values.put("state", false + "");
+                        DB.update("note", values, "serial = ? and title= ? and content = ? ", new String[]{serial, title, content});
+                        httpRequest.postNote(new HttpRequest.VolleyCallback() {
                             @Override
                             public void onSuccess(String label, String result) {
-                                Toast.makeText(PersonalNoteList.this,"上傳成功\n"+result,Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PersonalNoteList.this, "上傳成功\n" + result, Toast.LENGTH_SHORT).show();
                             }
+
                             @Override
                             public void onError(String error) {
-                                Toast.makeText(PersonalNoteList.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PersonalNoteList.this, "上傳失敗\n" + error, Toast.LENGTH_SHORT).show();
                             }
-                           @Override
-                           public void onImageSuccess(String label, Bitmap result) {
 
-                           }
-                        },serial,tv_title.getText().toString(),tv_content.getText().toString(),3);
-                       RefreshNotesList();
+                            @Override
+                            public void onImageSuccess(String label, Bitmap result) {
 
+                            }
+                        }, serial, tv_title.getText().toString(), tv_content.getText().toString(), 3);
+                        RefreshNotesList();
                     }
                     notifyDataSetChanged();
                 }
@@ -221,26 +223,26 @@ public class PersonalNoteList extends AppCompatActivity implements
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
 
-                                    DB.delete("note", "serial = ? and title= ? and content = ? ", new String[]{serial,title,content});
+                                    DB.delete("note", "serial = ? and title= ? and content = ? ", new String[]{serial, title, content});
 
                                     httpRequest.postNote(new HttpRequest.VolleyCallback() {
                                         @Override
                                         public void onSuccess(String label, String result) {
-                                            Toast.makeText(PersonalNoteList.this,"上傳成功\n"+result,Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(PersonalNoteList.this, "上傳成功\n" + result, Toast.LENGTH_SHORT).show();
                                         }
 
                                         @Override
                                         public void onError(String error) {
-                                            Toast.makeText(PersonalNoteList.this,"上傳失敗\n"+error,Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(PersonalNoteList.this, "上傳失敗\n" + error, Toast.LENGTH_SHORT).show();
                                         }
 
                                         @Override
                                         public void onImageSuccess(String label, Bitmap result) {
 
                                         }
-                                    },serial,tv_title.getText().toString(),tv_content.getText().toString(),3);
+                                    }, serial, tv_title.getText().toString(), tv_content.getText().toString(), 3);
                                     RefreshNotesList();
-                                    Toast.makeText(PersonalNoteList.this,"已刪除",Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(PersonalNoteList.this, "已刪除", Toast.LENGTH_SHORT).show();
                                 }
                             })
                             .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -258,25 +260,24 @@ public class PersonalNoteList extends AppCompatActivity implements
                 @Override
                 public void onClick(View view) {
                     sll_main.setStatus(SwipeListLayout.Status.Close, true);
-                    Toast.makeText(PersonalNoteList.this,"修改",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PersonalNoteList.this, "修改", Toast.LENGTH_SHORT).show();
 
 
                     Intent myIntent = new Intent(PersonalNoteList.this, AddNoteActivity.class);
                     Bundle bundle = new Bundle();
-                    bundle.putString("title",title );
+                    bundle.putString("title", title);
                     bundle.putString("info", content);
                     bundle.putInt("enter_state", 1);
-                    bundle.putString("serial",serial);
-                    bundle.putInt("arg0",arg0);
-                    bundle.putBoolean("state",state);
+                    bundle.putString("serial", serial);
+                    bundle.putInt("arg0", arg0);
+                    bundle.putBoolean("state", state);
                     myIntent.putExtras(bundle);
-                    startActivityForResult(myIntent,1);
+                    startActivityForResult(myIntent, 1);
                     notifyDataSetChanged();
                 }
             });
             return view;
         }
-
     }
 
     @Override

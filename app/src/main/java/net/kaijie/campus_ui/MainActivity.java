@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -85,6 +86,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.vision.text.Text;
 
 import net.kaijie.campus_ui.NetworkResource.ChatSocket;
 import net.kaijie.campus_ui.NetworkResource.HttpRequest;
@@ -135,7 +137,7 @@ public class MainActivity extends AppCompatActivity
     private ArrayList<Marker> mMarkers = new ArrayList<>();
     private ArrayAdapter<String> adFloor;
     public ImageButton bt_navigation;
-    private SharedPreferences settings;
+    public SharedPreferences settings;
     private static final String marker_data = "DATA";
     private static final String bicycle_state = "bicycle_state";
     private static final String montor_state = "montor_state";
@@ -144,6 +146,9 @@ public class MainActivity extends AppCompatActivity
     private static final String college_state = "college_state";
     private static final String isCourseDataReady = "isCourseDataReady";
     private static final String courseData = "CourseData";
+    public  static final String fb_userName = "fb_userName";
+    private static final String fb_userID = "fb_userID";
+    private static final String user_depart = "user_depart";
     private static final int REQUEST_PERMISSION = 99; //設定權限是否設定成功的檢查碼
     private static Boolean isExit = false;
     private static Boolean hasTask = false;
@@ -460,6 +465,7 @@ public class MainActivity extends AppCompatActivity
             final TextView tv_depart = (TextView) view.findViewById(R.id.tv_depart);
             final TextView tv_user = (TextView) view.findViewById(R.id.tv_user);
             final ImageView iv_userSticker = (ImageView) view.findViewById(R.id.iv_userSticker);
+            iv_userSticker.setImageResource(R.mipmap.default_sticker);
             final Button bt_setDepart = (Button) view.findViewById(R.id.bt_setDepart);
             bt_setDepart.setOnClickListener(new OnClickListener() {
                 @Override
@@ -467,28 +473,17 @@ public class MainActivity extends AppCompatActivity
 
                 }
             });
-            LoginButton loginButton = (LoginButton) view.findViewById(R.id.login_button);
 
+            LoginButton loginButton = (LoginButton) view.findViewById(R.id.login_button);
             FB_Login(loginButton,tv_depart,bt_setDepart,tv_user,iv_userSticker);
-            if (tv_user.getText().equals("")) {
-                tv_depart.setVisibility(GONE);
-                tv_user.setVisibility(GONE);
-                iv_userSticker.setVisibility(GONE);
-                bt_setDepart.setVisibility(GONE);
-                loginButton.setVisibility(VISIBLE);
-            } else {
-                tv_user.setVisibility(VISIBLE);
-                iv_userSticker.setVisibility(VISIBLE);
-                if(tv_depart.getText().equals(""))
-                    bt_setDepart.setVisibility(VISIBLE);
-                else
-                    tv_depart.setVisibility(VISIBLE);
-                //loginButton.setVisibility(GONE);
-            }
+
+            settings.getString(fb_userName,"");
+            loadUserSetting(settings.getString(fb_userID,""),tv_depart,tv_user,iv_userSticker,bt_setDepart);
+
             addView(view);
         }
 
-        private void FB_Login(final LoginButton loginButton ,final TextView tv_depart,final Button bt_setDepart, final TextView tv_user, final ImageView iv_userSticker) {
+        private void FB_Login(final LoginButton loginButton ,final TextView tv_depart,final Button bt_setDepart,final TextView tv_user, final ImageView iv_userSticker) {
             //宣告callback Manager
             callbackManager = CallbackManager.Factory.create();
             //找到login button
@@ -515,6 +510,7 @@ public class MainActivity extends AppCompatActivity
                                             "\nUser ID: " + object.optString("id") +
                                             "\nUser Link:\n" + object.optString("link");
                                     tv_user.setText(object.optString("name"));
+                                    settings.edit().putString(fb_userName,object.optString("name")).putString(fb_userID,object.optString("id")).apply();
                                     String url = "https://graph.facebook.com/"+object.optString("id")+"/picture?type=large&w\u200C\u200Bidth=400&height=400";
                                     httpRequest.getSticker(new HttpRequest.VolleyCallback() {
                                         @Override
@@ -531,11 +527,15 @@ public class MainActivity extends AppCompatActivity
                                         public void onImageSuccess(String label, Bitmap result) {
                                             iv_userSticker.setImageBitmap(getCircleBitmap(result));
                                             tv_user.setVisibility(VISIBLE);
-                                            iv_userSticker.setVisibility(VISIBLE);
-                                            if(tv_depart.getText().equals(""))
+                                            if(settings.getString(user_depart,"").equals("")) {
                                                 bt_setDepart.setVisibility(VISIBLE);
-                                            else
+                                                tv_depart.setVisibility(GONE);
+                                            }
+                                            else {
                                                 tv_depart.setVisibility(VISIBLE);
+                                                bt_setDepart.setVisibility(GONE);
+                                                tv_depart.setText(settings.getString(user_depart,""));
+                                            }
                                         }
                                     },url);
                                 }
@@ -559,6 +559,43 @@ public class MainActivity extends AppCompatActivity
                     Log.d("FB_test",exception.toString());
                 }
             });
+        }
+
+        private void loadUserSetting(String userID,final TextView tv_depart, final TextView tv_user, final ImageView iv_sticker,Button bt_setDepart){
+            if(settings.getString(user_depart,"").equals("")) {
+                bt_setDepart.setVisibility(VISIBLE);
+                tv_depart.setVisibility(GONE);
+            }
+            else {
+                tv_depart.setVisibility(VISIBLE);
+                bt_setDepart.setVisibility(GONE);
+                tv_depart.setText(settings.getString(user_depart,""));
+            }
+            if(!userID.equals("")) {
+                String url = "https://graph.facebook.com/" + userID + "/picture?type=large&w\u200C\u200Bidth=400&height=400";
+                httpRequest.getSticker(new HttpRequest.VolleyCallback() {
+                    @Override
+                    public void onSuccess(String label, String result) {
+
+                    }
+
+                    @Override
+                    public void onError(String error) {
+
+                    }
+
+                    @Override
+                    public void onImageSuccess(String label, Bitmap result) {
+                        iv_sticker.setImageBitmap(getCircleBitmap(result));
+                        tv_user.setVisibility(VISIBLE);
+                    }
+                }, url);
+                tv_user.setText(settings.getString(fb_userName,""));
+            }
+            else{
+                tv_user.setVisibility(GONE);
+                bt_setDepart.setVisibility(GONE);
+            }
         }
 
         public Bitmap getCircleBitmap(Bitmap bitmap) {
@@ -1015,11 +1052,17 @@ public class MainActivity extends AppCompatActivity
                         if (name.equals(temp))
                             index = i;
                     }
-                    chatSocket.connect("yuntech_" + userCourseList.get(index).getserial(), Build.SERIAL);
                     Intent intent = new Intent();
                     Bundle bundle = new Bundle();
+                    if(settings.getString(fb_userName,"").equals("")) {
+                        chatSocket.connect("yuntech_" + userCourseList.get(index).getserial(), "匿名_" + Build.SERIAL);
+                        bundle.putString("username", "匿名_" + Build.SERIAL);
+                    }else {
+                        chatSocket.connect("yuntech_" + userCourseList.get(index).getserial(), settings.getString(fb_userName, ""));
+                        bundle.putString("username", settings.getString(fb_userName, ""));
+                    }
                     bundle.putString("roomID", userCourseList.get(index).getserial() + " " + userCourseList.get(index).getname());
-                    bundle.putString("username", Build.SERIAL);
+
                     intent.putExtras(bundle);
                     intent.setClass(MainActivity.this, ChatActivity.class);
                     startActivity(intent);

@@ -51,11 +51,18 @@ public class TopicChatAdapter extends RecyclerView.Adapter<TopicChatAdapter.View
         return new Viewholder(LayoutInflater.from(context).inflate(R.layout.recycler_item, parent, false), new Viewholder.MyItemClickListener() {
             @Override
             public void clickOnView(View v, int position) {
-                MainActivity.mainActivity.chatSocket.connect("yuntech_" + position ,Build.SERIAL);
                 Intent intent = new Intent();
                 Bundle bundle = new Bundle();
+                if(MainActivity.mainActivity.settings.getString(MainActivity.fb_userName,"").equals("")) {
+                    MainActivity.mainActivity.chatSocket.connect("yuntech_" + position, "匿名_" + Build.SERIAL);
+                    bundle.putString("username", "匿名_" + Build.SERIAL);
+                    
+
+                }else {
+                    MainActivity.mainActivity.chatSocket.connect("yuntech_" + position, MainActivity.mainActivity.settings.getString(MainActivity.fb_userName, ""));
+                    bundle.putString("username", MainActivity.mainActivity.settings.getString(MainActivity.fb_userName, ""));
+                }
                 bundle.putString("roomID", list.get(position));
-                bundle.putString("username", Build.SERIAL);
                 intent.putExtras(bundle);
                 intent.setClass(context,ChatActivity.class);
                 context.startActivity(intent);
