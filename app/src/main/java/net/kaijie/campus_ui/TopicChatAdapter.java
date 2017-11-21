@@ -32,11 +32,11 @@ public class TopicChatAdapter extends RecyclerView.Adapter<TopicChatAdapter.View
         }
 
         @Override
-        public void onClick(View v) {
+     public void onClick(View v) {
             mListener.clickOnView(v, getLayoutPosition());
         }
 
-        public interface MyItemClickListener {
+     public interface MyItemClickListener {
             void clickOnView(View v, int position);
         }
     }

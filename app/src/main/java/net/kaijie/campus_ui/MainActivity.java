@@ -328,8 +328,6 @@ public class MainActivity extends AppCompatActivity
             into_class.setAdapter(ClassInfo); //定義顯示課程資訊的清單物件
 
             String course_plan = "True";
-
-            //  final String[] classes_Item = {"上課教室：","課號：","課程名稱：","授課老師：","教學大綱網站：\n"}; //設定存有課程項目的陣列
             ClassInfo.clear(); //先把清單物件的資料陣列清空
             result_dialog.clear(); //再把要存組合字串的陣列內容清空
             result_dialog.add("上課教室：" + room);

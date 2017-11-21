@@ -40,9 +40,7 @@ import java.util.Set;
  * Created by pc on 2017/11/3.
  */
 
-public class PersonalNoteList extends AppCompatActivity implements
-        AdapterView.OnItemClickListener,
-        AdapterView.OnItemLongClickListener {
+public class PersonalNoteList extends AppCompatActivity {
 
     private TextView tv_listname;
     public  ListView note_list;
@@ -67,8 +65,6 @@ public class PersonalNoteList extends AppCompatActivity implements
 
         Toast.makeText(PersonalNoteList.this,""+serial+name,Toast.LENGTH_SHORT).show();
         InitView();
-
-
         httpRequest = new HttpRequest(PersonalNoteList.this);
 
     }
@@ -84,7 +80,7 @@ public class PersonalNoteList extends AppCompatActivity implements
         @Override
         public void onStatusChanged(SwipeListLayout.Status status) {
             if (status == SwipeListLayout.Status.Open) {
-                //若有其他的item的状态为Open，则Close，然后移除
+                //若有其他的item的狀態為Open，则Close，然後移除
                 if (sets.size() > 0) {
                     for (SwipeListLayout s : sets) {
                         s.setStatus(SwipeListLayout.Status.Close, true);
@@ -161,8 +157,6 @@ public class PersonalNoteList extends AppCompatActivity implements
                 @Override
                 public void onClick(View view) {
                     sll_main.setStatus(SwipeListLayout.Status.Close, true);
-
-                    //   Toast.makeText(PersonalNoteList.this,"共用",Toast.LENGTH_SHORT).show();
 
                     ContentValues values = new ContentValues();
 
@@ -299,9 +293,6 @@ public class PersonalNoteList extends AppCompatActivity implements
         dataList = new ArrayList<>();
         DbHelper = new NoteDateBaseHelper(this);
         DB = DbHelper.getReadableDatabase();
-       /* note_list.setOnItemClickListener(this);
-        note_list.setOnItemLongClickListener(this);
-*/
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -328,8 +319,6 @@ public class PersonalNoteList extends AppCompatActivity implements
     }
 
     private void RefreshNotesList() {
-        //如果dataList已经有的内容，全部删掉
-        //并且更新simp_adapter
         int size = dataList.size();
         if (size > 0) {
             dataList.clear();
@@ -352,10 +341,6 @@ public class PersonalNoteList extends AppCompatActivity implements
 
         }
 
-     /*   simple_adapter = new SimpleAdapter(this, dataList, R.layout.notelist_item,
-                new String[]{"tv_title","tv_content", "tv_date"}, new int[]{
-                R.id.tv_title,R.id.tv_content, R.id.tv_date});
-*/
         listAdapter= new ListAdapter(dataList);
         note_list.setAdapter(listAdapter);
         note_list.setOnScrollListener(new OnScrollListener() {
@@ -383,47 +368,4 @@ public class PersonalNoteList extends AppCompatActivity implements
         });
     }
 
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String content = parent.getItemAtPosition(position).toString();
-
-        String content1 = content.split("[{},=]")[2];
-        String title1 = content.split("[{},=]")[6];
-
-
-        Intent myIntent = new Intent(PersonalNoteList.this, AddNoteActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("title",title1 );
-        bundle.putString("info", content1);
-        bundle.putInt("enter_state", 1);
-        bundle.putString("serial",serial);
-        myIntent.putExtras(bundle);
-        startActivity(myIntent);
-
-
-    }
-
-    @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-        Builder builder = new Builder(this)
-                .setTitle("刪除筆記")
-                .setMessage("確定要刪除嗎？")
-                .setPositiveButton("確定", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String content = note_list.getItemAtPosition(position) + "";
-                        String content1 = content.substring(content.indexOf("=") + 1, content.indexOf(","));
-
-                        DB.delete("note", "content = ?", new String[]{content1});
-                        RefreshNotesList();
-                    }
-                })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-        builder.create();
-        builder.show();
-        return true;
-    }
 }

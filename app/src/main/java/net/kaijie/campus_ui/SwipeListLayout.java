@@ -51,20 +51,16 @@ public class SwipeListLayout extends FrameLayout {
     }
 
     public interface OnSwipeStatusListener {
-        /**
-         * 当状态改变时回调
-         *
-         * @param status
-         */
+
         void onStatusChanged(Status status);
 
         /**
-         * 开始执行Open动画
+         * 執行open動畫
          */
         void onStartCloseAnimation();
 
         /**
-         * 开始执行Close动画
+         * 執行close動畫
          */
         void onStartOpenAnimation();
     }
@@ -106,13 +102,12 @@ public class SwipeListLayout extends FrameLayout {
             if (itemView == changedView) {
                 hiddenView.offsetLeftAndRight(dx);
             }
-            // 有时候滑动很快的话 会出现隐藏按钮的linearlayout没有绘制的问题
-            // 为了确保绘制成功 调用 invalidate
+            // 防止滑太快沒有繪製，為了確定畫好 而用 invalidate
             invalidate();
         }
         @Override
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
-            // 向右滑xvel为正 向左滑xvel为负
+            // 向右滑xvel為正 向左滑xvel為負
             if (releasedChild == itemView) {
                 if (xvel == 0
                         && Math.abs(itemView.getLeft()) > hiddenViewWidth / 2.0f) {
@@ -180,12 +175,12 @@ public class SwipeListLayout extends FrameLayout {
     @Override
     public void computeScroll() {
         super.computeScroll();
-        // 开始执行动画
+        // 開始執行動畫
         if (mDragHelper.continueSettling(true)) {
             ViewCompat.postInvalidateOnAnimation(this);
         }
     }
-    // 让ViewDragHelper来处理触摸事件
+    // touch事件
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         final int action = ev.getAction();
@@ -196,7 +191,7 @@ public class SwipeListLayout extends FrameLayout {
         return mDragHelper.shouldInterceptTouchEvent(ev);
     }
 
-    // 让ViewDragHelper来处理触摸事件
+    //touch事件
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         mDragHelper.processTouchEvent(event);
@@ -206,14 +201,14 @@ public class SwipeListLayout extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        hiddenView = getChildAt(0); // 得到隐藏按钮的linearlayout
-        itemView = getChildAt(1); // 得到最上层的linearlayout
+        hiddenView = getChildAt(0); // 得到隱藏按鈕的linearlayout
+        itemView = getChildAt(1); // 得到最上層的linearlayout
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        // 测量子View的长和宽
+        // 測量item長寬大小
         itemWidth = itemView.getMeasuredWidth();
         itemHeight = itemView.getMeasuredHeight();
         hiddenViewWidth = hiddenView.getMeasuredWidth();

@@ -192,11 +192,4 @@ public class Course implements Parcelable {
         dest.writeByte((byte) (forSearch ? 1 : 0));
     }
 
-  /*  @Override
-    public String toString() {
-        return "Course [Classtimes=" + schedule + ", Day=" + day + ", des=" + teacher
-                +",Classroom="+room+", spanNun=" + spanNum + "]";
-    }
-*/
-
 }

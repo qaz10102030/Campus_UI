@@ -129,6 +129,25 @@ public class HttpRequest {
         getRequest.setRetryPolicy(new DefaultRetryPolicy(VolleyTimeOut,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         mQueue.add(getRequest);
     }
+    public void postShareNote(final VolleyCallback callback, final String serial) {
+        volleycallback = callback;
+        getRequest = new StringRequest(Request.Method.POST,Server + "/get_note_shared",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        volleycallback.onSuccess("note", response);
+                    }
+                }, errorlistener){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("serial",serial);
+                return params;
+            }
+        };
+        getRequest.setRetryPolicy(new DefaultRetryPolicy(VolleyTimeOut,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        mQueue.add(getRequest);
+    }
     public interface VolleyCallback{
         void onSuccess(String label, String result);
         void onError(String error);

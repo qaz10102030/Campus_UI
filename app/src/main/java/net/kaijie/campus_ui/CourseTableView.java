@@ -45,7 +45,7 @@ public class CourseTableView extends RelativeLayout {
 
 
     private void updateCourseViews( ) {
-        //在每次做更新操作时，先清除一下当前的已经添加上去的View
+        //在每次做更新操作时，先清除一下當前的已经添加上去的View
         clearViewsIfNeeded();
         FrameLayout fl;
         FrameLayout.LayoutParams flp;
@@ -57,7 +57,7 @@ public class CourseTableView extends RelativeLayout {
             final int day = c.getday();
 
 
-            //外层包裹一个FrameLayout 方便为TextView设置padding，保证课程信息与边框有一定距离(2dp)
+            //外層包一個FrameLayout 方便為TextView設定padding，課程訊息跟邊框有間隔(2dp)
             fl = new FrameLayout(getContext());
             //设置课程信息的宽高，宽度就是列宽，高度是行高 * 跨度
             flp = new FrameLayout.LayoutParams(notFirstEveryColumnsWidth,

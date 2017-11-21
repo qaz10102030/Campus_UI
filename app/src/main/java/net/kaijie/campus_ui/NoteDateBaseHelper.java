@@ -28,7 +28,6 @@ public class NoteDateBaseHelper extends SQLiteOpenHelper {
                 +"state text)";
         db.execSQL(CreateNote);
     }
-
     @Override
     public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2) {
         // TODO Auto-generated method stub
