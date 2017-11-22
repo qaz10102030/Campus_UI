@@ -35,7 +35,7 @@ public class AddCourseActivity extends AppCompatActivity implements
     private CourseAdapter courseAdapter;
     private List<Course> addCourse;
     private List<Course> userCourse = new ArrayList<>();
-
+    private int[][] classtable = new int[7][16];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -47,7 +47,15 @@ public class AddCourseActivity extends AppCompatActivity implements
             Toast.makeText(AddCourseActivity.this,"無課程資料無法選課",Toast.LENGTH_SHORT).show();
             finish();
         }
-        userCourse = getIntent().getBundleExtra("userCourse").getParcelableArrayList("list");
+       userCourse = getIntent().getBundleExtra("userCourse").getParcelableArrayList("userCourseList");
+        for(int course_size = 0; course_size<userCourse.size(); course_size++) {
+
+
+            int addspan = userCourse.get(course_size).getschedule()+ userCourse.get(course_size).getSpanNum()- 1;
+            for (int spnum = userCourse.get(course_size).getschedule(); spnum <= addspan; spnum++) {
+                classtable[userCourse.get(course_size).getday()-1][spnum-1] = 1;
+            }
+        }
         initView();
         initCourse();
     }
@@ -114,11 +122,15 @@ public class AddCourseActivity extends AppCompatActivity implements
     private boolean checkCourseCollision(Course targetCourse){
         int targetDay = targetCourse.getday();
         int targetSchedule = targetCourse.getschedule();
-        /*
-        for (int i = 0; i < userCourse.size(); i++) {
-            if(userCourse.get(i).getday() == targetDay && userCourse.get(i).getschedule() == )
-        }*/
-        return true;
+        int targetspanNum = targetCourse.getSpanNum();
+        int addtarget=targetSchedule+targetspanNum;
+        for(int target = targetSchedule; target<addtarget;target++) {
+            if (classtable[targetDay - 1][target - 1] == 1){
+                return true;
+            }
+
+        }
+        return false;
     }
 
     @Override
@@ -181,8 +193,13 @@ public class AddCourseActivity extends AppCompatActivity implements
                         .setNegativeButton("新增", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                Toast.makeText(AddCourseActivity.this, "已新增", Toast.LENGTH_SHORT).show();
-                                addCourse.add(displayCourse);
+                                if(checkCourseCollision(displayCourse)) {
+                                    Toast.makeText(AddCourseActivity.this, "該課堂已衝堂 請檢查課表", Toast.LENGTH_SHORT).show();
+                                }
+                                else{
+                                    Toast.makeText(AddCourseActivity.this, "已新增", Toast.LENGTH_SHORT).show();
+                                    addCourse.add(displayCourse);
+                                }
                             }
                         })
                         .setPositiveButton("離開", new DialogInterface.OnClickListener() {

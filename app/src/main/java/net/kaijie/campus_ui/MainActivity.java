@@ -86,6 +86,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.plus.model.people.Person;
 import com.google.android.gms.vision.text.Text;
 
 import net.kaijie.campus_ui.NetworkResource.ChatSocket;
@@ -315,6 +316,7 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(MainActivity.this, "新增失敗", Toast.LENGTH_SHORT).show();
             }
         }
+
     }
 
     @Override
@@ -449,6 +451,7 @@ public class MainActivity extends AppCompatActivity
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.tab_1, null);
             TabLayout mTabs = (TabLayout) view.findViewById(R.id.tabs2);
+
             mTabs.addTab(mTabs.newTab().setText("我的筆記"));
             mTabs.addTab(mTabs.newTab().setText("共同筆記"));
             ViewPager mViewPager2 = (ViewPager) view.findViewById(R.id.viewpager2);
@@ -1133,7 +1136,6 @@ public class MainActivity extends AppCompatActivity
                     startActivity(intent);
                 }
             });
-
             person2.setAdapter(p2);
             addView(view);
         }
