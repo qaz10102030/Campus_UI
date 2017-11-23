@@ -81,7 +81,7 @@ public class CourseAdapter extends ArrayAdapter<Course> {
 
             for(int i = 0;i<courseList.size();i++) {
                 Course searchCourse = courseList.get(i);
-                if (searchCourse.getserial().contains(constraint.toString()))
+                if (searchCourse.getserial().contains(constraint.toString()) || searchCourse.getname().contains(constraint.toString()))
                     filterList.add(courseList.get(i));
             }
             if(filterList.size() == 0){

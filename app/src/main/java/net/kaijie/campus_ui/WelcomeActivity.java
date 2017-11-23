@@ -1,5 +1,6 @@
 package net.kaijie.campus_ui;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,7 +27,7 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
  * Created by pc on 2017/11/13.
  */
 
-public class WelcomeActivity extends AppCompatActivity {
+public class WelcomeActivity extends Activity {
 
     private static final int REQUEST_PERMISSION = 99; //設定權限是否設定成功的檢查碼
 
