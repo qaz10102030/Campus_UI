@@ -159,6 +159,26 @@ public class AddCourseActivity extends AppCompatActivity implements
         super.onBackPressed();
     }
 
+    public boolean checkUnAddCourse(Course targetCourse){
+        int[][] localClassTable = new int[7][16];
+        for(int course_size = 0; course_size<addCourse.size(); course_size++) {
+            int addspan = addCourse.get(course_size).getschedule()+ addCourse.get(course_size).getSpanNum()- 1;
+            for (int spnum = addCourse.get(course_size).getschedule(); spnum <= addspan; spnum++) {
+                localClassTable[addCourse.get(course_size).getday()-1][spnum-1] = 1;
+            }
+        }
+        int targetDay = targetCourse.getday();
+        int targetSchedule = targetCourse.getschedule();
+        int targetspanNum = targetCourse.getSpanNum();
+        int addtarget=targetSchedule+targetspanNum;
+        for(int target = targetSchedule; target<addtarget;target++) {
+            if (localClassTable[targetDay - 1][target - 1] == 1){
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         final Course displayCourse = (Course) parent.getItemAtPosition(position);
@@ -194,6 +214,9 @@ public class AddCourseActivity extends AppCompatActivity implements
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 if(checkCourseCollision(displayCourse)) {
+                                    Toast.makeText(AddCourseActivity.this, "該課堂已衝堂 請檢查課表", Toast.LENGTH_SHORT).show();
+                                }
+                                else if(checkUnAddCourse(displayCourse)){
                                     Toast.makeText(AddCourseActivity.this, "該課堂已衝堂 請檢查課表", Toast.LENGTH_SHORT).show();
                                 }
                                 else{

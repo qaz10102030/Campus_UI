@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import net.kaijie.campus_ui.ChatResource.ChatAdapter;
 import net.kaijie.campus_ui.ChatResource.ChatMessage;
@@ -96,7 +97,7 @@ public class ChatActivity extends AppCompatActivity{
         @Override
         public void onError(Exception err) {
             Log.d("Chat_Activity_err",err.getMessage());
-            onDestroy();
+            finish();
         }
     };
 

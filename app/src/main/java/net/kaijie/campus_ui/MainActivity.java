@@ -288,11 +288,16 @@ public class MainActivity extends AppCompatActivity
         int id = view.getId();
         switch (id) {
             case R.id.menu_item:
-                Intent intent = new Intent(this, AddCourseActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putParcelableArrayList("userCourseList", (ArrayList<? extends Parcelable>) userCourseList);
-                intent.putExtra("userCourse", bundle);
-                startActivityForResult(intent, 1);
+                if(!settings.getBoolean(isCourseDataReady,false))
+                {
+                    downloadCourse();
+                }else {
+                    Intent intent = new Intent(this, AddCourseActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelableArrayList("userCourseList", (ArrayList<? extends Parcelable>) userCourseList);
+                    intent.putExtra("userCourse", bundle);
+                    startActivityForResult(intent, 1);
+                }
                 menu.close(true);
                 break;
         }
@@ -471,7 +476,123 @@ public class MainActivity extends AppCompatActivity
             bt_setDepart.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    final String[][] departInfo = new String[][]
+                            {
+                                    {"工程科技研究所博士班",
+                                            "機械工程系博士班",
+                                            "機械工程系碩士班",
+                                            "機械工程系",
+                                            "電機工程系碩士班",
+                                            "電機工程系",
+                                            "電子工程系博士班",
+                                            "電子工程系碩士班",
+                                            "電子工程系",
+                                            "環境與安全衛生工程系博士班",
+                                            "環境與安全衛生工程系碩士班",
+                                            "環境與安全衛生工程系",
+                                            "化學工程與材料工程系博士班",
+                                            "化學工程與材料工程系碩士班",
+                                            "化學工程與材料工程系",
+                                            "營建工程系碩士班",
+                                            "營建工程系",
+                                            "資訊工程系碩士班",
+                                            "資訊工程系",
+                                            "光電工程研究所碩士班",
+                                            "防災與環境資源工程研究所碩士班",
+                                            "通訊工程研究所碩士班",
+                                            "營建與物業管理研究所"},
+                                    {"高階管理碩士學位學程",
+                                            "商管專業學院碩士班",
+                                            "管理研究所博士班",
+                                            "工商管理學士學位學程",
+                                            "工業工程與管理系博士班",
+                                            "工業工程與管理系碩士班",
+                                            "工業工程與管理系",
+                                            "企業管理系博士班",
+                                            "企業管理系碩士班",
+                                            "企業管理系",
+                                            "資訊管理系博士班",
+                                            "資訊管理系碩士班",
+                                            "資訊管理系",
+                                            "財務金融系博士班",
+                                            "財務金融系碩士班",
+                                            "財務金融系",
+                                            "會計系博士班",
+                                            "會計系碩士班",
+                                            "會計系",
+                                            "全球運籌管理研究所碩士班",
+                                            "健康產業管理研究所碩士班",
+                                            "國際管理學士學位學程",
+                                            "國際企業管理研究所碩士班",
+                                            "創業管理碩士學位學程",
+                                            "產業經營專業博士學位學程"},
+                                    {"設計學研究所碩士班",
+                                            "設計學研究所博士班",
+                                            "工業設計系碩士班",
+                                            "工業設計系",
+                                            "視覺傳達設計系碩士班",
+                                            "視覺傳達設計系",
+                                            "建築與室內設計系碩士班",
+                                            "建築與室內設計系",
+                                            "數位媒體設計系碩士班",
+                                            "數位媒體設計系",
+                                            "創意生活設計系碩士班",
+                                            "創意生活設計系"},
+                                    {"前瞻學士學位學程",
+                                            "人文與科學學院",
+                                            "應用外語系碩士班",
+                                            "應用外語系",
+                                            "文化資產維護系碩士班",
+                                            "文化資產維護系",
+                                            "技術及職業教育研究所博士班",
+                                            "技術及職業教育研究所碩士班",
+                                            "漢學應用研究所碩士班",
+                                            "休閒運動研究所碩士班",
+                                            "科技法律研究所碩士班",
+                                            "材料科技研究所",
+                                            "語言中心",
+                                            "英語菁英學程",
+                                            "師資培育中心",
+                                            "通識教育中心"},
+                                    {"不分系"}
+                            };
+                    LayoutInflater inflater = LayoutInflater.from(MainActivity.this); //LayoutInflater的目的是將自己設計xml的Layout轉成View
+                    View depart_view = inflater.inflate(R.layout.set_deaprt, null); //指定要給View表述的Layout
+                    final Spinner spinner4 = (Spinner) depart_view.findViewById(R.id.spinner4);
+                    final ArrayAdapter<String> sp4 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, new String[]{"工程學院", "管理學院","設計學院", "人文學院","不分系"});
+                    sp4.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinner4.setAdapter(sp4);
+                    final Spinner spinner5 = (Spinner) depart_view.findViewById(R.id.spinner5);
+                    ArrayAdapter<String> sp5 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, departInfo[0]);
+                    sp5.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinner5.setAdapter(sp5);
 
+                    spinner4.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            ArrayAdapter<String> temp = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, departInfo[position]);
+                            spinner5.setAdapter(temp);
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+
+                        }
+                    });
+
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("選擇系別")
+                            .setView(depart_view)
+                            .setMessage("注意!系別只能設定一次!")
+                            .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Toast.makeText(MainActivity.this,"選了\n" +
+                                            spinner4.getSelectedItem().toString() + "\n" +
+                                            spinner5.getSelectedItem().toString(),Toast.LENGTH_SHORT).show();
+                                    settings.edit().putString(user_depart,spinner5.getSelectedItem().toString()).apply();
+                                }
+                            }).show();
                 }
             });
 
@@ -676,9 +797,11 @@ public class MainActivity extends AppCompatActivity
                     };
             final Spinner spinner1 = (Spinner) view.findViewById(R.id.spinner);
             ArrayAdapter<String> sp1 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, new String[]{"室外場地", "體育場"});
+            sp1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner1.setAdapter(sp1);
             final Spinner spinner2 = (Spinner) view.findViewById(R.id.spinner2);
             ArrayAdapter<String> sp2 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, courtInfo[0]);
+            sp2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner2.setAdapter(sp2);
             ListView lvCourt = (ListView) view.findViewById(R.id.lvCourt);
             View headerView = getLayoutInflater().inflate(R.layout.listview_header2, lvCourt, false);
@@ -744,6 +867,7 @@ public class MainActivity extends AppCompatActivity
                                                     multiCourt.add(innerCourt);
                                                 }
                                                 ArrayAdapter<String> sp3 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, multiCourt);
+                                                sp3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                                 spinner3.setAdapter(sp3);
                                                 spinner3.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                                                     @Override
