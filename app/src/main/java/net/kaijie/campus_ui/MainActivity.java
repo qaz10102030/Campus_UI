@@ -79,6 +79,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import net.kaijie.campus_ui.NetworkResource.ChatSocket;
 import net.kaijie.campus_ui.NetworkResource.HttpRequest;
@@ -149,6 +151,9 @@ public class MainActivity extends AppCompatActivity
     private ArrayAdapter p1;
     private ArrayAdapter p2;
     private ArrayAdapter courseChat;
+    private Polyline polyline;
+    private Handler handler = new Handler();
+    private AlertDialog alertDialog;
     //////////////////////
 
     @Override
@@ -1330,13 +1335,44 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onMapClick(LatLng latLng) {
-        if (null != singleMarker) {
-            Toast.makeText(MainActivity.this, singleMarker.getTitle(), Toast.LENGTH_SHORT).show();
-            Animation fadeout = AnimationUtils.loadAnimation(this, R.anim.fade_out);
-            bt_navigation.startAnimation(fadeout);
+    public void onMapClick(final LatLng latLng) {
+        for (String key1 : buildkind.keySet()) {
+            for (String key2 : buildkind.get(key1).keySet()) {
+                if (CommonMethod.isPointInPolygon(latLng,(ArrayList<LatLng>) buildkind.get(key1).get(key2))) {
+                    Toast.makeText(MainActivity.this,"選到了\n" + key1 + "\n" + key2,Toast.LENGTH_SHORT).show();
+                    try {
+                        final LatLng now = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
+                        alertDialog = new AlertDialog.Builder(MainActivity.this)
+                                .setTitle("導航")
+                                .setMessage("是否前往" + key2 + "?")
+                                .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        String url = "https://maps.googleapis.com/maps/api/directions/json?" +
+                                                "origin=" + now.latitude + "," + now.longitude + "&" +
+                                                "destination=" + latLng.latitude + "," + latLng.longitude + "&" +
+                                                "language=zh-TW&" +
+                                                "sensor=true&" +
+                                                "mode=walking";
+                                        httpRequest.getDirection(url, callback);
+                                        alertDialog.dismiss();
+                                    }
+                                })
+                                .setNegativeButton("否", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        alertDialog.dismiss();
+                                    }
+                                }).show();
+
+
+                    } catch(Exception e) {
+                        Log.d("NowLocation", e.toString());
+                        Toast.makeText(MainActivity.this, "無法得當前位置", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
         }
-        singleMarker = null;
     }
 
     @Override
@@ -1812,7 +1848,64 @@ public class MainActivity extends AppCompatActivity
                         }
                     }).start();
                     break;
+                case "direction":
+                    Log.d("direction",result);
+                    DirectionHandle(result);
             }
+        }
+
+        private void DirectionHandle(String result) {
+            JSONObject jsonObject;
+            try {
+                jsonObject = new JSONObject(result);
+                JSONArray routeObject = jsonObject.getJSONArray("routes");
+                String polyline = routeObject.getJSONObject(0).getJSONObject("overview_polyline").getString("points");
+                if (polyline.length() > 0) {
+                    drawPath(decodePoly(polyline));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private ArrayList<LatLng> decodePoly(String encoded) {
+            ArrayList<LatLng> poly = new ArrayList<>();
+            int index = 0, len = encoded.length(), lat = 0, lng = 0;
+            while (index < len) {
+                int b, shift = 0, result = 0;
+                do {
+                    b = encoded.charAt(index++) - 63;
+                    result |= (b & 0x1f) << shift;
+                    shift += 5;
+                } while (b >= 0x20);
+                int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+                lat += dlat;
+                shift = 0;
+                result = 0;
+                do {
+                    b = encoded.charAt(index++) - 63;
+                    result |= (b & 0x1f) << shift;
+                    shift += 5;
+                } while (b >= 0x20);
+                int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+                lng += dlng;
+                LatLng p = new LatLng((((double) lat / 1E5)), (((double) lng / 1E5)));
+                poly.add(p);
+            }
+            return poly;
+        }
+
+        private void drawPath(final ArrayList<LatLng> points) {
+            Runnable r1 =  new Runnable() {
+                @Override
+                public void run() {
+                    if(polyline != null)
+                        polyline.remove();
+                    polyline = mMap.addPolyline(new PolylineOptions().addAll(points).width(5).color(Color.BLUE));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(points.get(0), 15.5f), 2000, null);
+                }
+            };
+            handler.post(r1);
         }
 
         @Override

@@ -150,6 +150,18 @@ public class HttpRequest {
         getRequest.setRetryPolicy(new DefaultRetryPolicy(VolleyTimeOut,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         mQueue.add(getRequest);
     }
+    public void getDirection(final String url,final VolleyCallback callback) {
+        volleycallback = callback;
+        getRequest = new StringRequest(url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        volleycallback.onSuccess("direction", response);
+                    }
+                }, errorlistener);
+        getRequest.setRetryPolicy(new DefaultRetryPolicy(VolleyTimeOut,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        mQueue.add(getRequest);
+    }
     public interface VolleyCallback{
         void onSuccess(String label, String result);
         void onError(String error);

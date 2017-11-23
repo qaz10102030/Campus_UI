@@ -1859,4 +1859,18 @@ public class CommonMethod {
         mapArea.put("設計學院", temp);
         return mapArea;
     }
+
+    public static boolean isPointInPolygon(LatLng tap, ArrayList<LatLng> vertices) {
+        int i, j, nvert = vertices.size();
+        boolean c = false;
+        for(i = 0, j = nvert - 1; i < nvert; j = i++) {
+            if( ( (vertices.get(i).longitude >= tap.longitude ) != (vertices.get(j).longitude >= tap.longitude) ) &&
+                    (tap.latitude <= (vertices.get(j).latitude - vertices.get(i).latitude) * (tap.longitude - vertices.get(i).longitude)
+                            / (vertices.get(j).longitude - vertices.get(i).longitude) + vertices.get(i).latitude)
+                    )
+                c = !c;
+        }
+
+        return c;
+    }
 }
