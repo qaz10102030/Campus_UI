@@ -52,7 +52,7 @@ public class PersonalNoteList extends AppCompatActivity {
 
     private String serial;
     private String name;
-
+    private String userName;
 
     private HttpRequest httpRequest;
     @Override
@@ -62,6 +62,7 @@ public class PersonalNoteList extends AppCompatActivity {
         Bundle bundle=getIntent().getExtras();
         serial = bundle.getString("serial");
         name = bundle.getString("name");
+        userName = bundle.getString("userName");
 
         Toast.makeText(PersonalNoteList.this,""+serial+name,Toast.LENGTH_SHORT).show();
         InitView();
@@ -178,7 +179,7 @@ public class PersonalNoteList extends AppCompatActivity {
                             public void onImageSuccess(String label, Bitmap result) {
 
                             }
-                        }, serial, tv_title.getText().toString(), tv_content.getText().toString(), 1);
+                        }, serial, tv_title.getText().toString(), tv_content.getText().toString(), 1,userName);
                         RefreshNotesList();
                     } else {
                         values.put("state", false + "");
@@ -198,7 +199,7 @@ public class PersonalNoteList extends AppCompatActivity {
                             public void onImageSuccess(String label, Bitmap result) {
 
                             }
-                        }, serial, tv_title.getText().toString(), tv_content.getText().toString(), 3);
+                        }, serial, tv_title.getText().toString(), tv_content.getText().toString(), 3,userName);
                         RefreshNotesList();
                     }
                     notifyDataSetChanged();
@@ -234,7 +235,7 @@ public class PersonalNoteList extends AppCompatActivity {
                                         public void onImageSuccess(String label, Bitmap result) {
 
                                         }
-                                    }, serial, tv_title.getText().toString(), tv_content.getText().toString(), 3);
+                                    }, serial, tv_title.getText().toString(), tv_content.getText().toString(), 3,userName);
                                     RefreshNotesList();
                                     Toast.makeText(PersonalNoteList.this, "已刪除", Toast.LENGTH_SHORT).show();
                                 }
@@ -263,6 +264,7 @@ public class PersonalNoteList extends AppCompatActivity {
                     bundle.putString("info", content);
                     bundle.putInt("enter_state", 1);
                     bundle.putString("serial", serial);
+                    bundle.putString("userName", userName);
                     bundle.putInt("arg0", arg0);
                     bundle.putBoolean("state", state);
                     myIntent.putExtras(bundle);
@@ -310,6 +312,7 @@ public class PersonalNoteList extends AppCompatActivity {
                 bundle.putString("info","");
                 bundle.putInt("enter_state", 0);
                 bundle.putString("serial",serial);
+                bundle.putString("userName", userName);
                 intent.putExtras(bundle);
                 startActivity(intent);
 

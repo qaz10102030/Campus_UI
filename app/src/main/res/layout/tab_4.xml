@@ -50,6 +50,15 @@
 
     </LinearLayout>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/courtTime"
+        android:background="#555"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@android:color/white" />
+
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -52,12 +52,6 @@ public class ChatActivity extends AppCompatActivity{
         String forActionbar = roomID + " 房間";
         actionbar_room_num.setText(forActionbar);
         getSupportActionBar().setCustomView(actionbarLayout);
-        ImageButton imageButton = (ImageButton)findViewById(R.id.actionbar_room_num_bt);
-        imageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-            }
-        });
     }
 
     private void initView() {

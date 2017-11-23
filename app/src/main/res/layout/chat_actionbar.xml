@@ -8,17 +8,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/actionbar_room_num_bt"
-            android:src="@drawable/abc_spinner_mtrl_am_alpha"
-            android:background="?android:selectableItemBackground"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true">
-
-        </ImageButton>
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

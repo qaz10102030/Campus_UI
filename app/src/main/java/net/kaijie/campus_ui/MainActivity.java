@@ -6,14 +6,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -40,7 +37,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -72,9 +68,6 @@ import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -86,8 +79,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
-import com.google.android.gms.plus.model.people.Person;
-import com.google.android.gms.vision.text.Text;
 
 import net.kaijie.campus_ui.NetworkResource.ChatSocket;
 import net.kaijie.campus_ui.NetworkResource.HttpRequest;
@@ -96,8 +87,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,10 +95,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class MainActivity extends AppCompatActivity
         //rabbit
@@ -150,7 +135,6 @@ public class MainActivity extends AppCompatActivity
     public  static final String fb_userName = "fb_userName";
     private static final String fb_userID = "fb_userID";
     private static final String user_depart = "user_depart";
-    private static final int REQUEST_PERMISSION = 99; //設定權限是否設定成功的檢查碼
     private static Boolean isExit = false;
     private static Boolean hasTask = false;
     private HttpRequest httpRequest;
@@ -159,6 +143,12 @@ public class MainActivity extends AppCompatActivity
     private ProgressDialog proDialog;
     private FloatingActionMenu menu;
     private CallbackManager callbackManager;
+    private List<String> p1List;
+    private List<String> p2List;
+    private List<String> courseList;
+    private ArrayAdapter p1;
+    private ArrayAdapter p2;
+    private ArrayAdapter courseChat;
     //////////////////////
 
     @Override
@@ -193,7 +183,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         //rabbit
-        check_permission();
         checkGPS();
         rabbit();
         /////////////////////////////////
@@ -316,6 +305,19 @@ public class MainActivity extends AppCompatActivity
                         userCourseList.add(temp.get(i));
                     }
                     courseTableView.updateCourseViews(userCourseList);
+                    p1List.clear();
+                    p2List.clear();
+                    courseList.clear();
+                    for (int i = 0; i < userCourseList.size(); i++) {
+                        String serial = userCourseList.get(i).getserial();
+                        String name = userCourseList.get(i).getname();
+                        p1List.add(serial + " " + name);
+                        p2List.add(serial + " " + name);
+                        courseList.add(name);
+                    }
+                    courseChat.notifyDataSetChanged();
+                    p1.notifyDataSetChanged();
+                    p2.notifyDataSetChanged();
                 }
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(MainActivity.this, "新增失敗", Toast.LENGTH_SHORT).show();
@@ -334,7 +336,6 @@ public class MainActivity extends AppCompatActivity
             ArrayAdapter<String> ClassInfo = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1);//設定課程資訊的清單物件要顯示資料的陣列
             into_class.setAdapter(ClassInfo); //定義顯示課程資訊的清單物件
 
-            String course_plan = "True";
             ClassInfo.clear(); //先把清單物件的資料陣列清空
             result_dialog.clear(); //再把要存組合字串的陣列內容清空
             result_dialog.add("上課教室：" + room);
@@ -370,6 +371,19 @@ public class MainActivity extends AppCompatActivity
                             }
                             userCourseList.remove(remove_c);
                             courseTableView.updateCourseViews(userCourseList);
+                            p1List.clear();
+                            p2List.clear();
+                            courseList.clear();
+                            for (int j = 0; j < userCourseList.size(); j++) {
+                                String serial = userCourseList.get(j).getserial();
+                                String name = userCourseList.get(j).getname();
+                                p1List.add(serial + " " + name);
+                                p2List.add(serial + " " + name);
+                                courseList.add(name);
+                            }
+                            courseChat.notifyDataSetChanged();
+                            p1.notifyDataSetChanged();
+                            p2.notifyDataSetChanged();
                         }
                     })
                     .setPositiveButton("離開", new DialogInterface.OnClickListener() {
@@ -583,13 +597,20 @@ public class MainActivity extends AppCompatActivity
                     new AlertDialog.Builder(MainActivity.this)
                             .setTitle("選擇系別")
                             .setView(depart_view)
-                            .setMessage("注意!系別只能設定一次!")
+                            .setMessage("注意! 系別只能設定一次!")
                             .setPositiveButton("確定", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    Toast.makeText(MainActivity.this,"選了\n" +
+                                    Toast.makeText(MainActivity.this,"已設定為\n" +
                                             spinner4.getSelectedItem().toString() + "\n" +
                                             spinner5.getSelectedItem().toString(),Toast.LENGTH_SHORT).show();
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            tv_depart.setText(spinner5.getSelectedItem().toString());
+                                            bt_setDepart.setVisibility(GONE);
+                                        }
+                                    });
                                     settings.edit().putString(user_depart,spinner5.getSelectedItem().toString()).apply();
                                 }
                             }).show();
@@ -804,8 +825,7 @@ public class MainActivity extends AppCompatActivity
             sp2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner2.setAdapter(sp2);
             ListView lvCourt = (ListView) view.findViewById(R.id.lvCourt);
-            View headerView = getLayoutInflater().inflate(R.layout.listview_header2, lvCourt, false);
-            TextView tv_court_header = (TextView) headerView.findViewById(R.id.tv_court_header);
+            TextView tv_court_header = (TextView) view.findViewById(R.id.courtTime);
             Date date = new Date();
             int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(date)) - 1911;
             final String month = new SimpleDateFormat("MM").format(date);
@@ -823,7 +843,6 @@ public class MainActivity extends AppCompatActivity
             final String courtDate = year + month + checkMonFir + "-" + year + month + checkMonLast;
             String headerInfo = "場地資料日期：" + courtDate;
             tv_court_header.setText(headerInfo);
-            lvCourt.addHeaderView(headerView);
             final ArrayList<String> court_data = new ArrayList<>();
             final ArrayAdapter<String> court = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, court_data);
             lvCourt.setAdapter(court);
@@ -1158,15 +1177,12 @@ public class MainActivity extends AppCompatActivity
             list.add("社團版");
             TopicChatAdapter topicChatAdapter = new TopicChatAdapter(list, MainActivity.this);
             recyclerView.setAdapter(topicChatAdapter);
-            List<String> courseList = new ArrayList<>();
+            courseList = new ArrayList<>();
             for (int i = 0; i < userCourseList.size(); i++) {
                 courseList.add(userCourseList.get(i).getname());
             }
             ListView lv_course_chat = (ListView) view.findViewById(R.id.lv_course_chat);
-            View headerView = getLayoutInflater().inflate(R.layout.listview_header, lv_course_chat, false);
-            lv_course_chat.addHeaderView(headerView);
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, courseList);
-            lv_course_chat.setAdapter(adapter);
+            courseChat = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, courseList);
             lv_course_chat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -1193,6 +1209,7 @@ public class MainActivity extends AppCompatActivity
                     startActivity(intent);
                 }
             });
+            lv_course_chat.setAdapter(courseChat);
             addView(view);
         }
     }
@@ -1201,18 +1218,17 @@ public class MainActivity extends AppCompatActivity
         public PersonalOneView(Context context) {
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.personal1, null);
-            List<String> p1List = new ArrayList<>();
+            p1List = new ArrayList<>();
 
             for (int i = 0; i < userCourseList.size(); i++) {
                 String serial = userCourseList.get(i).getserial();
                 String name = userCourseList.get(i).getname();
-                String teather = userCourseList.get(i).getteacher();
                 p1List.add(serial + " " + name);
             }
 
             ListView person1 = (ListView) view.findViewById(R.id.lvPerson1);
 
-            ArrayAdapter p1 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, p1List);
+            p1 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, p1List);
 
             person1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -1223,6 +1239,7 @@ public class MainActivity extends AppCompatActivity
                     Bundle bundle = new Bundle();
                     bundle.putString("serial", serial);
                     bundle.putString("name", name);
+                    bundle.putString("userName", settings.getString(fb_userName,"匿名_"+Build.SERIAL));
                     Intent intent = new Intent(MainActivity.this, PersonalNoteList.class);
                     intent.putExtras(bundle);
                     startActivity(intent);
@@ -1237,16 +1254,15 @@ public class MainActivity extends AppCompatActivity
         public PersonalTwoView(Context context) {
             super(context);
             View view = LayoutInflater.from(context).inflate(R.layout.personal2, null);
-            List<String> p2List = new ArrayList<>();
+            p2List = new ArrayList<>();
             for (int i = 0; i < userCourseList.size(); i++) {
                 String serial = userCourseList.get(i).getserial();
                 String name = userCourseList.get(i).getname();
-                String teather = userCourseList.get(i).getteacher();
                 p2List.add(serial + " " + name);
             }
 
             ListView person2 = (ListView) view.findViewById(R.id.lvPerson2);
-            ArrayAdapter p2 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, p2List);
+            p2 = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, p2List);
 
             person2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -1396,7 +1412,7 @@ public class MainActivity extends AppCompatActivity
     private void downloadCourse() {
         final boolean[] check = {false};
         new AlertDialog.Builder(MainActivity.this) //宣告對話框物件，並顯示課程資料
-                .setTitle("初次使用")
+                .setTitle("無課程資料!")
                 .setMessage("是否下載課程資料?")
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
                     @Override
@@ -1763,16 +1779,6 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    public void check_permission() {
-        int location = ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION);
-        if (location != PackageManager.PERMISSION_GRANTED) { //檢查是否有權限
-            ActivityCompat.requestPermissions( //如果沒有就跟使用者要求
-                    MainActivity.this,
-                    new String[]{WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE, ACCESS_FINE_LOCATION}, REQUEST_PERMISSION
-            );
-        }
-    }
-
     public void checkGPS() {
         if (!isGPSEnabled(this)) {
             Toast.makeText(MainActivity.this, "請開始定位功能避免定位失效", Toast.LENGTH_SHORT).show();
@@ -1796,10 +1802,15 @@ public class MainActivity extends AppCompatActivity
     };
     public HttpRequest.VolleyCallback callback = new HttpRequest.VolleyCallback() {
         @Override
-        public void onSuccess(String label, String result) {
+        public void onSuccess(String label, final String result) {
             switch (label) {
                 case "course":
-                    analysis_course(result);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            analysis_course(result);
+                        }
+                    }).start();
                     break;
             }
         }

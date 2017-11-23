@@ -83,7 +83,7 @@ public class HttpRequest {
         getRequest.setRetryPolicy(new DefaultRetryPolicy(VolleyTimeOut,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         mQueue.add(getRequest);
     }
-    public void modifyNote(final VolleyCallback callback, final String serial, final String org_title, final String org_content, final String new_title, final String new_content,final int mothed) {
+    public void modifyNote(final VolleyCallback callback, final String serial, final String org_title, final String org_content, final String new_title, final String new_content,final int mothed,final String userName) {
         volleycallback = callback;
         getRequest = new StringRequest(Request.Method.POST, Server + "/note_shared",
                 new Response.Listener<String>() {
@@ -101,13 +101,14 @@ public class HttpRequest {
                 params.put("new_title", new_title);
                 params.put("new_content", new_content);
                 params.put("method", mothed + "");
+                params.put("userName",userName);
                 return params;
             }
         };
         getRequest.setRetryPolicy(new DefaultRetryPolicy(VolleyTimeOut, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         mQueue.add(getRequest);
     }
-    public void postNote(final VolleyCallback callback, final String serial, final String title, final String content, final int mothed) {
+    public void postNote(final VolleyCallback callback, final String serial, final String title, final String content, final int mothed,final String userName) {
         volleycallback = callback;
         getRequest = new StringRequest(Request.Method.POST,Server + "/note_shared",
                 new Response.Listener<String>() {
@@ -123,6 +124,7 @@ public class HttpRequest {
                 params.put("title",title);
                 params.put("content",content);
                 params.put("method",mothed+"");
+                params.put("userName",userName);
                 return params;
             }
         };
